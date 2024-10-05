@@ -32,6 +32,6 @@ class User(
     @LastModifiedDate
     lateinit var updatedAt: LocalDateTime
 
-    @Column
+    @Column("deleted_at")
     var deletedAt: LocalDateTime? = null
 }

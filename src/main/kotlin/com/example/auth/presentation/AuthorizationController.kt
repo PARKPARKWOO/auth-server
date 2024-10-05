@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.RestController
 class AuthorizationController(
     private val registrationService: RegistrationService,
 ) {
-    @PostMapping("/sign-up")
-    fun register() = mono {
-
+    @PostMapping("/registration")
+    fun register(): String {
+        println("subscribe")
+        return mono {
+            println("subscribe")
+            registrationService.signUpUser()
+        }.thenReturn("dd").block() ?: "null"
     }
 }

@@ -25,10 +25,13 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+    runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.73.Final:osx-aarch_64")
+
     // reactor
     testImplementation("io.projectreactor:reactor-test")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     // oauth + security
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
@@ -49,7 +52,6 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
 
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
 
@@ -65,8 +67,8 @@ dependencies {
     implementation("org.redisson:redisson:3.26.0")
 
     // flyway for db migration
-    implementation("org.flywaydb:flyway-core:9.22.3")
-    implementation("org.flywaydb:flyway-mysql:9.22.3")
+    implementation("org.flywaydb:flyway-core:10.19.0")
+    implementation("org.flywaydb:flyway-mysql:10.19.0")
 }
 
 kotlin {
