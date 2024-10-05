@@ -16,7 +16,7 @@ class AuthorizationController(
     suspend fun register(
         @RequestBody
         request: RegistrationUserRequest,
-    ) {
-        registrationService.registerUser(request.toCommand())
+    ): String {
+        return registrationService.registerUser(request.toCommand())
     }
 }
