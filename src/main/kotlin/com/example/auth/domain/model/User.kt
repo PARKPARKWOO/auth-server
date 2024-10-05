@@ -1,18 +1,17 @@
 package com.example.auth.domain.model
 
+import com.example.auth.business.RegisterUserCommand
 import com.fasterxml.uuid.Generators
 import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
-import java.util.UUID
 
 @Table("user")
 class User(
-    @Id
-    val id: UUID = Generators.timeBasedEpochGenerator().generate(),
+    @Column("id")
+    val id: String = Generators.timeBasedEpochGenerator().generate().toString(),
     @Column("email")
     val email: String?,
     @Column("password")
@@ -20,9 +19,7 @@ class User(
     @Column("social_id")
     val socialId: String?,
     @Column("provider")
-    val provider: String?,
-    @Column("profile")
-    val profile: String?,
+    val provider: SocialProvider?,
 ) {
     @Column("created_at")
     @CreatedDate
@@ -34,4 +31,13 @@ class User(
 
     @Column("deleted_at")
     var deletedAt: LocalDateTime? = null
+
+    companion object {
+        fun fromCommand(command: RegisterUserCommand): User = User(
+            email = command.email,
+            password = command.password,
+            socialId = command.socialId,
+            provider = command.provider,
+        )
+    }
 }

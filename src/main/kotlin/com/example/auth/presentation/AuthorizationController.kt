@@ -1,8 +1,9 @@
 package com.example.auth.presentation
 
 import com.example.auth.business.RegistrationService
-import kotlinx.coroutines.reactor.mono
+import com.example.auth.presentation.request.RegistrationUserRequest
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -12,11 +13,10 @@ class AuthorizationController(
     private val registrationService: RegistrationService,
 ) {
     @PostMapping("/registration")
-    fun register(): String {
-        println("subscribe")
-        return mono {
-            println("subscribe")
-            registrationService.signUpUser()
-        }.thenReturn("dd").block() ?: "null"
+    suspend fun register(
+        @RequestBody
+        request: RegistrationUserRequest,
+    ) {
+        registrationService.registerUser(request.toCommand())
     }
 }
