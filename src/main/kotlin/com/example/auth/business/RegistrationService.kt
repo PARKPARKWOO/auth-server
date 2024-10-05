@@ -5,7 +5,6 @@ import com.example.auth.domain.repository.UserRepository
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.stereotype.Service
 import org.springframework.transaction.reactive.TransactionalOperator
-import java.util.UUID
 
 @Service
 class RegistrationService(
