@@ -1,6 +1,6 @@
 package com.example.auth.presentation.request
 
-import com.example.auth.business.RegisterUserCommand
+import com.example.auth.business.command.RegisterUserCommand
 import com.example.auth.domain.model.SocialProvider
 
 data class RegistrationUserRequest(

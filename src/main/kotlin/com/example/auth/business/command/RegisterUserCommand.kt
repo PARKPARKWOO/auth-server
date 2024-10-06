@@ -1,4 +1,4 @@
-package com.example.auth.business
+package com.example.auth.business.command
 
 import com.example.auth.domain.model.SocialProvider
 
