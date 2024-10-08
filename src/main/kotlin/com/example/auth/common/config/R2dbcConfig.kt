@@ -1,4 +1,4 @@
-package com.example.auth.common
+package com.example.auth.common.config
 
 import io.r2dbc.spi.ConnectionFactory
 import org.springframework.context.annotation.Bean

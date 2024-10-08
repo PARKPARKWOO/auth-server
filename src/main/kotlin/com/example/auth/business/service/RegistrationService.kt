@@ -1,5 +1,6 @@
-package com.example.auth.business
+package com.example.auth.business.service
 
+import com.example.auth.business.command.RegisterUserCommand
 import com.example.auth.domain.model.User
 import com.example.auth.domain.repository.UserRepository
 import kotlinx.coroutines.reactive.awaitSingle

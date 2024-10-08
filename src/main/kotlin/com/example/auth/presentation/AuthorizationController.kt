@@ -1,6 +1,6 @@
 package com.example.auth.presentation
 
-import com.example.auth.business.RegistrationService
+import com.example.auth.business.service.RegistrationService
 import com.example.auth.presentation.request.RegistrationUserRequest
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
