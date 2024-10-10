@@ -1,4 +1,4 @@
-package com.example.auth.business.service
+package com.example.auth.business.service.oauth
 
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest

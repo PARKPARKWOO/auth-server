@@ -45,7 +45,8 @@ dependencies {
     implementation("io.asyncer:r2dbc-mysql:1.2.0")
 
     // swagger-ui
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0")
+
 
     // jackson
 //    implementation("com.fasterxml.jackson.core:jackson-core:2.15.2")
@@ -70,6 +71,12 @@ dependencies {
     // flyway for db migration
     implementation("org.flywaydb:flyway-core:10.19.0")
     implementation("org.flywaydb:flyway-mysql:10.19.0")
+
+    configurations {
+        all {
+            exclude(group = "org.springframework.boot", module = "spring-boot-starter-web")
+        }
+    }
 }
 
 kotlin {

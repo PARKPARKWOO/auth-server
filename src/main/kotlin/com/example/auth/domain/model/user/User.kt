@@ -1,6 +1,7 @@
-package com.example.auth.domain.model
+package com.example.auth.domain.model.user
 
 import com.example.auth.business.command.RegisterUserCommand
+import com.example.auth.domain.model.oauth.SocialProvider
 import com.fasterxml.uuid.Generators
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
