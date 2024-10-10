@@ -12,7 +12,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -45,7 +44,7 @@ class SecurityConfig(
             "/swagger-ui.html",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/webjars/**"
+            "/webjars/**",
         )
     }
 
@@ -93,7 +92,7 @@ class SecurityConfig(
         return CorsWebFilter(source)
     }
 
-//    @Bean
+    //    @Bean
 //    fun jwtDecoder(): ReactiveJwtDecoder {
 //        return NimbusReactiveJwtDecoder.withPublicKey(rsaPublicKey())
 //            .build()

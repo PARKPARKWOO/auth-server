@@ -5,6 +5,7 @@ import com.example.auth.business.service.dto.ClientRegistrationInfoDto
 import com.example.auth.business.service.oauth.CustomOAuthService
 import com.example.auth.business.service.oauth.CustomOidcService
 import com.example.auth.domain.model.oauth.SocialProvider
+import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepositoryImpl
 import kotlinx.coroutines.runBlocking
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -26,9 +27,7 @@ import org.springframework.security.oauth2.client.endpoint.WebClientReactiveRefr
 import org.springframework.security.oauth2.client.endpoint.WebClientReactiveTokenExchangeTokenResponseClient
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager
 import org.springframework.security.oauth2.client.registration.ClientRegistration
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository
-import org.springframework.security.oauth2.client.registration.InMemoryReactiveClientRegistrationRepository
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames
 import org.springframework.web.reactive.function.client.WebClient
@@ -124,7 +123,7 @@ class OAuthConfig(
             .build()
 
     @Bean
-    fun clientRegistrationRepository(): InMemoryReactiveClientRegistrationRepository {
+    fun clientRegistrationRepository(): ReactiveClientRegistrationRepository {
         val applicationList: List<ClientRegistrationInfoDto> =
             runBlocking {
                 runCatching {
@@ -132,11 +131,13 @@ class OAuthConfig(
                 }.getOrElse { emptyList<ClientRegistrationInfoDto>() }
             }
         return if (applicationList.isEmpty()) {
-            InMemoryReactiveClientRegistrationRepository(
-                CommonOAuth2Provider.GOOGLE.getBuilder("google")
-                    .clientId("your-client-id")
-                    .clientSecret("your-client-secret")
-                    .build(),
+            DynamicReactiveClientRegistrationRepositoryImpl(
+                listOf(
+                    CommonOAuth2Provider.GOOGLE.getBuilder("google")
+                        .clientId("your-client-id")
+                        .clientSecret("your-client-secret")
+                        .build(),
+                ),
             )
         } else {
             val clientRegistrations: MutableList<ClientRegistration> = mutableListOf()
@@ -159,7 +160,7 @@ class OAuthConfig(
                 }
                 clientRegistrations.add(clientRegistration)
             }
-            InMemoryReactiveClientRegistrationRepository(clientRegistrations)
+            DynamicReactiveClientRegistrationRepositoryImpl(clientRegistrations)
         }
     }
 
