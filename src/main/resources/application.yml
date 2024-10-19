@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: reactive
   r2dbc:
     url: r2dbc:mysql://${mysql.host}:3306/auth
     username: ${RDBMS_USERNAME}
@@ -14,16 +16,3 @@ spring:
 
 mysql:
   host: ${RDBMS_URL}
-
-find-my-pet:
-  oauth2:
-    google:
-      client-id: ${FMP_GOOGLE_CLIENT_ID}
-      client-secret: ${FMP_GOOGLE_CLIENT_SECRET}
-    kakao:
-      client-id: ${FMP_KAKAO_CLIENT_ID}
-
-pocket-fit:
-  oauth:
-    kakao:
-      client-id: ${PF_KAKAO_CLIENT_ID}

@@ -1,7 +1,7 @@
 package com.example.auth.presentation.request
 
 import com.example.auth.business.command.RegisterUserCommand
-import com.example.auth.domain.model.SocialProvider
+import com.example.auth.domain.model.oauth.SocialProvider
 
 data class RegistrationUserRequest(
     val email: String?,
