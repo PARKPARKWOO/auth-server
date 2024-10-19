@@ -1,3 +1,9 @@
+CREATE TABLE application
+(
+    id   VARCHAR(36)  NOT NULL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
 create table user
 (
     `id`       varchar(36)  not null primary key,
@@ -8,13 +14,6 @@ create table user
     created_at DATETIME     NOT NULL,
     updated_at DATETIME     NOT NULL,
     deleted_at DATETIME     NULL
-);
-
-
-CREATE TABLE application
-(
-    id   VARCHAR(36)  NOT NULL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE application_oauth_provider
