@@ -48,48 +48,6 @@ class OAuthConfig(
         const val KAKAO_TOKEN_URI = "https://kauth.kakao.com/oauth/token"
         const val KAKAO_USER_INFO_URI = "https://kapi.kakao.com/v2/user/me"
     }
-
-//    @PostConstruct
-//    fun generateClientRegistrationRepository() {
-//        val applicationList: List<ClientRegistrationInfoDto> =
-//            runBlocking {
-//                runCatching {
-//                    applicationOAuthService.findClientRegistrationInfoDto()
-//                }.getOrElse { emptyList<ClientRegistrationInfoDto>() }
-//            }
-//        if (applicationList.isEmpty()) {
-//            inMemoryClientRegistrationRepository = InMemoryClientRegistrationRepository(
-//                CommonOAuth2Provider.GOOGLE.getBuilder("1").clientId("id").clientSecret("se").build(),
-//            )
-//            return
-//        }
-//        val clientRegistrations: MutableList<ClientRegistration> = mutableListOf()
-//        applicationList.forEach {
-//            val clientRegistration = when (it.provider) {
-//                SocialProvider.GOOGLE -> {
-//                    createGoogleClientRegistration(
-//                        id = it.id,
-//                        redirectUri = it.redirectUri,
-//                        applicationName = it.applicationName,
-//                        clientSecret = it.clientSecret!!,
-//                        clientId = it.clientId,
-//                    )
-//                }
-//
-//                SocialProvider.KAKAO -> {
-//                    createKakaoClientRegistration(
-//                        id = it.id,
-//                        redirectUri = it.redirectUri,
-//                        clientId = it.clientId,
-//                        applicationName = it.applicationName,
-//                    )
-//                }
-//            }
-//            clientRegistrations.add(clientRegistration)
-//        }
-//        inMemoryClientRegistrationRepository = InMemoryClientRegistrationRepository(clientRegistrations)
-//    }
-
     private fun createGoogleClientRegistration(
         id: Long,
         redirectUri: String,

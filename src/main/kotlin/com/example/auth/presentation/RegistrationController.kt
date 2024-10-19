@@ -3,6 +3,7 @@ package com.example.auth.presentation
 import com.example.auth.business.service.RegistrationService
 import com.example.auth.presentation.request.RegistrationApplicationOAuthRequest
 import com.example.auth.presentation.request.RegistrationApplicationRequest
+import com.example.auth.presentation.request.RegistrationDomainRequest
 import com.example.auth.presentation.request.RegistrationUserRequest
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -36,5 +37,13 @@ class RegistrationController(
         request: RegistrationApplicationOAuthRequest,
     ): Long {
         return registrationService.registerApplicationOAuthProvider(request.toCommand())
+    }
+
+    @PostMapping("/application/domain")
+    suspend fun registerDomain(
+        @RequestBody
+        request: RegistrationDomainRequest,
+    ) {
+        registrationService.registerApplicationDomains(request.toCommand())
     }
 }
