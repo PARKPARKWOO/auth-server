@@ -47,7 +47,6 @@ dependencies {
     // swagger-ui
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0")
 
-
     // jackson
 //    implementation("com.fasterxml.jackson.core:jackson-core:2.15.2")
 //    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
@@ -71,6 +70,11 @@ dependencies {
     // flyway for db migration
     implementation("org.flywaydb:flyway-core:10.19.0")
     implementation("org.flywaydb:flyway-mysql:10.19.0")
+
+    // jwt
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
     configurations {
         all {

@@ -43,16 +43,15 @@ class RegistrationService(
 
     suspend fun registerApplicationOAuthProvider(
         command: RegisterApplicationOAuthProviderCommand,
-    ): Long {
-        val application = applicationRepository.findById(command.applicationId).awaitSingle()
+    ): ApplicationOAuthProvider {
         val applicationOAuthProvider = ApplicationOAuthProvider(
-            applicationId = application.id,
+            applicationId = command.applicationId,
             provider = command.provider,
             redirectUri = command.redirectUri,
             clientId = command.clientId,
             clientSecret = command.clientSecret,
         )
-        return applicationOAuthProviderRepository.save(applicationOAuthProvider).awaitSingle().id
+        return applicationOAuthProviderRepository.save(applicationOAuthProvider).awaitSingle()
     }
 
     suspend fun registerApplicationDomains(

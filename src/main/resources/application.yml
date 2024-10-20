@@ -13,6 +13,17 @@ spring:
     user: ${spring.r2dbc.username}
     password: ${spring.r2dbc.password}
     locations: classpath:db/migration
-
+#logging:
+#  level:
+#    root: debug
 mysql:
   host: ${RDBMS_URL}
+
+# custom env
+jwt:
+  access-token:
+    secret-key: ${ACCESS_SECRET_KEY}
+    expire-millis: ${ACCESS_EXPIRE_MILLIS}
+  refresh-token:
+    secret-key: ${REFRESH_SECRET_KEY}
+    expire-millis: ${REFRESH_EXPIRE_MILLIS}

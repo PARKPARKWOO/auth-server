@@ -1,5 +1,8 @@
 package com.example.auth.common.config
 
+import com.example.auth.business.service.JwtTokenGenerator
+import com.example.auth.business.service.oauth.OAuthAuthenticationSuccessHandler
+import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepository
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet
@@ -22,6 +25,7 @@ import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter
 import org.springframework.security.web.server.SecurityWebFilterChain
+import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
@@ -38,6 +42,8 @@ class SecurityConfig(
     @Qualifier("oauth2LoginAuthenticationManager")
     private val oauth2LoginAuthenticationManager: DelegatingReactiveAuthenticationManager,
     private val oauth2ClientAuthenticationManager: OAuth2AuthorizationCodeReactiveAuthenticationManager,
+    private val dynamicReactiveClientRegistrationRepository: DynamicReactiveClientRegistrationRepository,
+    private val jwtTokenGenerator: JwtTokenGenerator,
 ) {
     companion object {
         val SWAGGER_WHITELIST = arrayOf(
@@ -54,6 +60,7 @@ class SecurityConfig(
     ): SecurityWebFilterChain {
         return http.csrf { csrf -> csrf.disable() }
             .authorizeExchange { exchange ->
+                exchange.pathMatchers("/**", "/login").permitAll() // 로그인 페이지와 루트는 허용
                 exchange.pathMatchers("/api/v1/auth/**").permitAll()
                     .pathMatchers(*SWAGGER_WHITELIST).permitAll()
                     .pathMatchers(HttpMethod.OPTIONS).permitAll()
@@ -70,11 +77,18 @@ class SecurityConfig(
             }
             .oauth2Login { oauth2Login ->
                 oauth2Login.authenticationManager(oauth2LoginAuthenticationManager)
+                oauth2Login.clientRegistrationRepository(dynamicReactiveClientRegistrationRepository)
+                oauth2Login.authenticationSuccessHandler(oAuth2AuthenticationSuccessHandler())
             }
             .oauth2Client { oauth2Client ->
                 oauth2Client.authenticationManager(oauth2ClientAuthenticationManager)
             }
             .build()
+    }
+
+    @Bean
+    fun oAuth2AuthenticationSuccessHandler(): ServerAuthenticationSuccessHandler {
+        return OAuthAuthenticationSuccessHandler(jwtTokenGenerator)
     }
 
     @Bean

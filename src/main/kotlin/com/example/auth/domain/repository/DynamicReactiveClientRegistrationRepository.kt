@@ -2,35 +2,41 @@ package com.example.auth.domain.repository
 
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
+import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 interface DynamicReactiveClientRegistrationRepository : ReactiveClientRegistrationRepository {
-    fun addRegistration(registration: ClientRegistration): Mono<Void>
+    suspend fun addRegistration(registration: ClientRegistration)
 
-    fun updateRegistration(registration: ClientRegistration): Mono<Void>
+    suspend fun updateRegistration(registration: ClientRegistration)
 
-    fun removeRegistration(registrationId: String): Mono<Void>
+    suspend fun removeRegistration(registrationId: String)
 }
 
-class DynamicReactiveClientRegistrationRepositoryImpl(
-    private val initialRegistrations: List<ClientRegistration>,
-) : DynamicReactiveClientRegistrationRepository {
-    private var registrations: MutableList<ClientRegistration> = Collections.synchronizedList(initialRegistrations)
+@Component
+class DynamicReactiveClientRegistrationRepositoryImpl : DynamicReactiveClientRegistrationRepository {
+    private val registrations: ConcurrentMap<String, ClientRegistration> = ConcurrentHashMap()
 
-    override fun addRegistration(registration: ClientRegistration): Mono<Void> {
-        TODO("Not yet implemented")
+    fun initialize(initialRegistrations: List<ClientRegistration>) {
+        registrations.putAll(initialRegistrations.associateBy { it.registrationId })
     }
 
-    override fun updateRegistration(registration: ClientRegistration): Mono<Void> {
-        TODO("Not yet implemented")
+    override suspend fun addRegistration(registration: ClientRegistration) {
+        registrations[registration.registrationId] = registration
     }
 
-    override fun removeRegistration(registrationId: String): Mono<Void> {
-        TODO("Not yet implemented")
+    override suspend fun updateRegistration(registration: ClientRegistration) {
+        registrations[registration.registrationId] = registration
+    }
+
+    override suspend fun removeRegistration(registrationId: String) {
+        registrations.remove(registrationId)
     }
 
     override fun findByRegistrationId(registrationId: String?): Mono<ClientRegistration> {
-        return Mono.justOrEmpty(registrations.find { it.registrationId == registrationId })
+        return Mono.justOrEmpty(registrations[registrationId])
     }
 }
