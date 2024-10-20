@@ -1,6 +1,8 @@
 package com.example.auth.presentation
 
+import com.example.auth.business.service.ApplicationOAuthService
 import com.example.auth.business.service.RegistrationService
+import com.example.auth.common.http.response.SucceededApiResponseBody
 import com.example.auth.presentation.request.RegistrationApplicationOAuthRequest
 import com.example.auth.presentation.request.RegistrationApplicationRequest
 import com.example.auth.presentation.request.RegistrationDomainRequest
@@ -14,36 +16,41 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/auth/registration")
 class RegistrationController(
     private val registrationService: RegistrationService,
+    private val applicationOAuthService: ApplicationOAuthService,
 ) {
     @PostMapping("/user")
     suspend fun registerUser(
         @RequestBody
         request: RegistrationUserRequest,
-    ): String {
-        return registrationService.registerUser(request.toCommand())
+    ): SucceededApiResponseBody<String> {
+        val response = registrationService.registerUser(request.toCommand())
+        return SucceededApiResponseBody(response)
     }
 
     @PostMapping("/application")
     suspend fun registerApplication(
         @RequestBody
         request: RegistrationApplicationRequest,
-    ): String {
-        return registrationService.registerApplication(request.name)
+    ): SucceededApiResponseBody<String> {
+        val response = registrationService.registerApplication(request.name)
+        return SucceededApiResponseBody(response)
     }
 
     @PostMapping("/application/oauth")
     suspend fun registerApplicationOAuth(
         @RequestBody
         request: RegistrationApplicationOAuthRequest,
-    ): Long {
-        return registrationService.registerApplicationOAuthProvider(request.toCommand())
+    ): SucceededApiResponseBody<Long> {
+        val response = applicationOAuthService.register(request.toCommand())
+        return SucceededApiResponseBody(response)
     }
 
     @PostMapping("/application/domain")
     suspend fun registerDomain(
         @RequestBody
         request: RegistrationDomainRequest,
-    ) {
+    ): SucceededApiResponseBody<Unit> {
         registrationService.registerApplicationDomains(request.toCommand())
+        return SucceededApiResponseBody.unit()
     }
 }

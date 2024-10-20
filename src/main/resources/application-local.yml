@@ -6,3 +6,11 @@ spring:
 
 mysql:
   host: localhost
+
+jwt:
+  access-token:
+    secret-key: ${ACCESS_SECRET_KEY:qwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwq}
+    expire-millis: ${ACCESS_EXPIRE_MILLIS:100000000000}
+  refresh-token:
+    secret-key: ${REFRESH_SECRET_KEY:asasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasaasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasaasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasasa}
+    expire-millis: ${REFRESH_EXPIRE_MILLIS:1000000000000000}

@@ -4,7 +4,6 @@ import com.example.auth.business.service.ApplicationOAuthService
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto
 import com.example.auth.business.service.oauth.CustomOAuthService
 import com.example.auth.business.service.oauth.CustomOidcService
-import com.example.auth.domain.model.oauth.SocialProvider
 import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepositoryImpl
 import kotlinx.coroutines.runBlocking
 import org.springframework.context.annotation.Bean
@@ -28,100 +27,14 @@ import org.springframework.security.oauth2.client.endpoint.WebClientReactiveToke
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
-import org.springframework.security.oauth2.core.AuthorizationGrantType
-import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
 
 @Configuration
 class OAuthConfig(
     private val customOidcService: CustomOidcService,
     private val customOAuthService: CustomOAuthService,
-    private val applicationOAuthService: ApplicationOAuthService,
 ) {
-    companion object {
-        //        const val GOOGLE_AUTHORIZATION_URI = ""
-        // https://www.googleapis.com/oauth2/v4/token 둘 중 하나임
-        const val GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token"
-        const val GOOGLE_USER_INFO_URI = "https://www.googleapis.com/oauth2/v3/userinfo"
-
-        //        const val KAKAO_AUTHORIZATION_URL = "https://kapi.kakao.com"
-        const val KAKAO_TOKEN_URI = "https://kauth.kakao.com/oauth/token"
-        const val KAKAO_USER_INFO_URI = "https://kapi.kakao.com/v2/user/me"
-    }
-    private fun createGoogleClientRegistration(
-        id: Long,
-        redirectUri: String,
-        applicationName: String,
-        clientSecret: String,
-        clientId: String,
-    ): ClientRegistration = CommonOAuth2Provider.GOOGLE
-        .getBuilder(id.toString())
-        .redirectUri(redirectUri)
-        .clientId(clientId)
-        .clientSecret(clientSecret)
-        .clientName(SocialProvider.GOOGLE.clientNamePrefix + applicationName)
-        .build()
-
-    private fun createKakaoClientRegistration(
-        id: Long,
-        redirectUri: String,
-        applicationName: String,
-        clientId: String,
-    ): ClientRegistration =
-        ClientRegistration.withRegistrationId(id.toString())
-            .clientId(clientId)
-            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-            .tokenUri(KAKAO_TOKEN_URI)
-            .redirectUri(redirectUri)
-            .userInfoUri(KAKAO_USER_INFO_URI)
-//            .userNameAttributeName()
-            .clientName(SocialProvider.KAKAO.clientNamePrefix + applicationName)
-            .userNameAttributeName(IdTokenClaimNames.SUB)
-            .scope("openid", "profile", "email")
-            .build()
-
-    @Bean
-    fun clientRegistrationRepository(): ReactiveClientRegistrationRepository {
-        val applicationList: List<ClientRegistrationInfoDto> =
-            runBlocking {
-                runCatching {
-                    applicationOAuthService.findClientRegistrationInfoDto()
-                }.getOrElse { emptyList<ClientRegistrationInfoDto>() }
-            }
-        return if (applicationList.isEmpty()) {
-            DynamicReactiveClientRegistrationRepositoryImpl(
-                listOf(
-                    CommonOAuth2Provider.GOOGLE.getBuilder("google")
-                        .clientId("your-client-id")
-                        .clientSecret("your-client-secret")
-                        .build(),
-                ),
-            )
-        } else {
-            val clientRegistrations: MutableList<ClientRegistration> = mutableListOf()
-            applicationList.forEach {
-                val clientRegistration = when (it.provider) {
-                    SocialProvider.GOOGLE -> createGoogleClientRegistration(
-                        id = it.id,
-                        redirectUri = it.redirectUri,
-                        applicationName = it.applicationName,
-                        clientSecret = it.clientSecret!!,
-                        clientId = it.clientId,
-                    )
-
-                    SocialProvider.KAKAO -> createKakaoClientRegistration(
-                        id = it.id,
-                        redirectUri = it.redirectUri,
-                        clientId = it.clientId,
-                        applicationName = it.applicationName,
-                    )
-                }
-                clientRegistrations.add(clientRegistration)
-            }
-            DynamicReactiveClientRegistrationRepositoryImpl(clientRegistrations)
-        }
-    }
-
     @Bean
     @Primary
     fun oauth2LoginAuthenticationManager(): DelegatingReactiveAuthenticationManager {
