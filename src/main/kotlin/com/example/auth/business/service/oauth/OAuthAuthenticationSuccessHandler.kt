@@ -48,7 +48,7 @@ class OAuthAuthenticationSuccessHandler(
     private fun createCookie(name: String, value: String, maxAge: Long): ResponseCookie {
         return ResponseCookie.from(name, value)
             .httpOnly(true)
-            .secure(true)
+//            .secure(true)
             .path("/")
             .maxAge(Duration.ofMillis(maxAge))
             .sameSite("Strict")
