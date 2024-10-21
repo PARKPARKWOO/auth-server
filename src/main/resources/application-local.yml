@@ -1,4 +1,9 @@
 spring:
+  data:
+    redis:
+      host: localhost
+      password: healthgood1!
+      port: 6379
   r2dbc:
     url: r2dbc:pool:mysql://localhost:3306/auth
     username: root

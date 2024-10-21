@@ -32,10 +32,11 @@ class RegistrationService(
         }.awaitSingle()
     }
 
-    suspend fun registerApplication(name: String): String {
+    suspend fun registerApplication(name: String, redirectUrl: String): String {
         return transactionalOperator.execute {
             val application = Application(
                 name = name,
+                redirectUrl = redirectUrl,
             )
             applicationRepository.save(application).thenReturn(application.id)
         }.awaitSingle()
@@ -47,7 +48,6 @@ class RegistrationService(
         val applicationOAuthProvider = ApplicationOAuthProvider(
             applicationId = command.applicationId,
             provider = command.provider,
-            redirectUri = command.redirectUri,
             clientId = command.clientId,
             clientSecret = command.clientSecret,
         )

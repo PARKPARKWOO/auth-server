@@ -14,8 +14,6 @@ class ApplicationOAuthProvider(
     val applicationId: String,
     @Column("provider")
     val provider: SocialProvider,
-    @Column("redirect_uri")
-    var redirectUri: String,
     @Column("client_id")
     var clientId: String,
     @Column("client_secret")

@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Transient
 import org.springframework.data.domain.Persistable
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 
 @Table(name = "application")
 class Application(
@@ -15,6 +16,10 @@ class Application(
     // unique
     @Column("name")
     val name: String,
+    @Column("redirect_url")
+    val redirectUrl: String,
+    @Column("created_at")
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 ) : Persistable<String> {
     @Transient
     private var newEntity: Boolean = true
