@@ -54,7 +54,7 @@ class RegistrationService(
         return applicationOAuthProviderRepository.save(applicationOAuthProvider).awaitSingle()
     }
 
-    suspend fun registerApplicationDomains(
+    suspend fun registerApplicationDomainsForCors(
         command: RegisterApplicationDomainCommand,
     ) {
         val application = applicationRepository.findById(command.applicationId).awaitSingle()

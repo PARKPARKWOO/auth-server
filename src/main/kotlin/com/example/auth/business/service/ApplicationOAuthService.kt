@@ -11,12 +11,8 @@ import com.example.auth.domain.model.oauth.SocialProvider.GOOGLE
 import com.example.auth.domain.model.oauth.SocialProvider.KAKAO
 import com.example.auth.domain.repository.ApplicationOAuthProviderRepository
 import com.example.auth.domain.repository.ApplicationRepository
-import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepositoryImpl
-import jakarta.annotation.PostConstruct
+import com.example.auth.domain.repository.DynamicReactiveClientRegistrationAdapter
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.runBlocking
-import org.springframework.security.config.oauth2.client.CommonOAuth2Provider
-import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 
@@ -26,34 +22,34 @@ class ApplicationOAuthService(
     private val registerService: RegistrationService,
     private val applicationRepository: ApplicationRepository,
     private val applicationFinder: ApplicationFinder,
-    private val dynamicReactiveClientRegistrationRepositoryImpl: DynamicReactiveClientRegistrationRepositoryImpl,
+    private val dynamicReactiveClientRegistrationAdapter: DynamicReactiveClientRegistrationAdapter,
 ) {
-    @PostConstruct
-    fun initializeClientRegistration() {
-        runBlocking {
-            val applicationList: List<ClientRegistrationInfoDto> =
-                runCatching {
-                    findClientRegistrationInfoDto()
-                }.getOrElse { emptyList<ClientRegistrationInfoDto>() }
-
-            if (applicationList.isEmpty()) {
-                dynamicReactiveClientRegistrationRepositoryImpl.initialize(
-                    listOf(
-                        CommonOAuth2Provider.GOOGLE.getBuilder("google")
-                            .clientId("your-client-id")
-                            .clientSecret("your-client-secret")
-                            .build(),
-                    ),
-                )
-            } else {
-                val clientRegistrations: MutableList<ClientRegistration> = mutableListOf()
-                applicationList.forEach {
-                    clientRegistrations.add(it.toClientRegistration())
-                }
-                dynamicReactiveClientRegistrationRepositoryImpl.initialize(clientRegistrations)
-            }
-        }
-    }
+//    @PostConstruct
+//    fun initializeClientRegistration() {
+//        runBlocking {
+//            val applicationList: List<ClientRegistrationInfoDto> =
+//                runCatching {
+//                    findClientRegistrationInfoDto()
+//                }.getOrElse { emptyList<ClientRegistrationInfoDto>() }
+//
+//            if (applicationList.isEmpty()) {
+//                dynamicReactiveClientRegistrationAdapter.initialize(
+//                    listOf(
+//                        CommonOAuth2Provider.GOOGLE.getBuilder("google")
+//                            .clientId("your-client-id")
+//                            .clientSecret("your-client-secret")
+//                            .build(),
+//                    ),
+//                )
+//            } else {
+//                val clientRegistrations: MutableList<ClientRegistration> = mutableListOf()
+//                applicationList.forEach {
+//                    clientRegistrations.add(it.toClientRegistration())
+//                }
+//                dynamicReactiveClientRegistrationAdapter.initialize(clientRegistrations)
+//            }
+//        }
+//    }
 
     suspend fun findClientRegistrationInfoDto(): MutableList<ClientRegistrationInfoDto> {
         val applicationList = applicationRepository.findAll().collectList().awaitSingle()
@@ -85,14 +81,13 @@ class ApplicationOAuthService(
         val registerApplicationOAuthProvider = registerService.registerApplicationOAuthProvider(command)
         val clientRegistrationInfoDto = ClientRegistrationInfoDto(
             id = registerApplicationOAuthProvider.id,
-//            redirectUri = registerApplicationOAuthProvider.redirectUri,
             applicationName = application.name,
             clientSecret = registerApplicationOAuthProvider.clientSecret,
             clientId = registerApplicationOAuthProvider.clientId,
             provider = registerApplicationOAuthProvider.provider,
         )
 
-        dynamicReactiveClientRegistrationRepositoryImpl.addRegistration(clientRegistrationInfoDto.toClientRegistration())
+//        dynamicReactiveClientRegistrationAdapter.addRegistration(clientRegistrationInfoDto.toClientRegistration())
         return clientRegistrationInfoDto.id
     }
 

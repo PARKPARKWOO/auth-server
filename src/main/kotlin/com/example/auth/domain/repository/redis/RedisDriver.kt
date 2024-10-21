@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
@@ -18,7 +19,6 @@ class RedisDriver(
         if (value != null) {
             redisTemplate.opsForValue().set(key, value, ttl).awaitSingle()
         }
-        // null 처리 필요한가
     }
 
     suspend fun <T> getValue(key: String, clazz: Class<T>): T? {
@@ -28,6 +28,11 @@ class RedisDriver(
 
     suspend fun <T> addListForRight(key: String, value: List<T>) {
         redisTemplate.opsForList().rightPush(key, value)
+            .awaitSingle()
+    }
+
+    suspend fun <T> addListForRight(key: String, value: T) {
+        redisTemplate.opsForList().rightPush(key, value!!)
             .awaitSingle()
     }
 
@@ -53,9 +58,15 @@ class RedisDriver(
     suspend fun <T> updateSetForSingle(key: String, previousValue: T, currentValue: T) {
         redisTemplate.opsForSet()
             .isMember(key, previousValue)
-            .asFlow().collect {
-                it.remove(it.keys)
-            }
+            .map {
+                it.values.forEach { isMember ->
+                    if (isMember) {
+                        redisTemplate.opsForSet()
+                            .remove(key, previousValue)
+                            .asFlow()
+                    }
+                }
+            }.awaitSingle()
         redisTemplate.opsForSet()
             .add(key, currentValue)
             .awaitSingle()
@@ -68,5 +79,4 @@ class RedisDriver(
             .map { ObjectMapper().convertValue(it, object : TypeReference<T>() {}) }
             .toSet()
     }
-    // 같은 값이더라도 생성되면 Id 값이 달라 Set 에 계속 저장된다.
 }

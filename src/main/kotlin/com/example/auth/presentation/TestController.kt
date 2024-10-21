@@ -3,7 +3,7 @@ package com.example.auth.presentation
 import com.example.auth.business.service.ApplicationOAuthService
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto
 import com.example.auth.domain.model.oauth.SocialProvider
-import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepositoryImpl.Companion.CLIENT_REGISTRATION_KEY
+import com.example.auth.domain.repository.DynamicReactiveClientRegistrationAdapter.Companion.CLIENT_REGISTRATION_KEY
 import com.example.auth.domain.repository.redis.RedisDriver
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider
 import org.springframework.security.oauth2.client.registration.ClientRegistration

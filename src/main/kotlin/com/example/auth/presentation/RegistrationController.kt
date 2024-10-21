@@ -53,7 +53,7 @@ class RegistrationController(
         @RequestBody
         request: RegistrationDomainRequest,
     ): SucceededApiResponseBody<Unit> {
-        registrationService.registerApplicationDomains(request.toCommand())
+        registrationService.registerApplicationDomainsForCors(request.toCommand())
         return SucceededApiResponseBody.unit()
     }
 }

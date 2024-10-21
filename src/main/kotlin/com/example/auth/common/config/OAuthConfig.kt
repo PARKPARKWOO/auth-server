@@ -2,9 +2,6 @@ package com.example.auth.common.config
 
 import com.example.auth.business.service.oauth.CustomOAuthService
 import com.example.auth.business.service.oauth.CustomOidcService
-import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepositoryImpl
-import jakarta.annotation.PostConstruct
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
