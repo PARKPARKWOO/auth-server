@@ -32,7 +32,10 @@ class RegistrationController(
         @RequestBody
         request: RegistrationApplicationRequest,
     ): SucceededApiResponseBody<String> {
-        val response = registrationService.registerApplication(request.name)
+        val response = registrationService.registerApplication(
+            name = request.name,
+            redirectUrl = request.redirectUrl,
+        )
         return SucceededApiResponseBody(response)
     }
 
@@ -50,7 +53,7 @@ class RegistrationController(
         @RequestBody
         request: RegistrationDomainRequest,
     ): SucceededApiResponseBody<Unit> {
-        registrationService.registerApplicationDomains(request.toCommand())
+        registrationService.registerApplicationDomainsForCors(request.toCommand())
         return SucceededApiResponseBody.unit()
     }
 }

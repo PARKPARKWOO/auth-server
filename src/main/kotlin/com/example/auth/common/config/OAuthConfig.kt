@@ -1,16 +1,11 @@
 package com.example.auth.common.config
 
-import com.example.auth.business.service.ApplicationOAuthService
-import com.example.auth.business.service.dto.ClientRegistrationInfoDto
 import com.example.auth.business.service.oauth.CustomOAuthService
 import com.example.auth.business.service.oauth.CustomOidcService
-import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepositoryImpl
-import kotlinx.coroutines.runBlocking
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager
-import org.springframework.security.config.oauth2.client.CommonOAuth2Provider
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthorizationCodeReactiveAuthenticationManager
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginReactiveAuthenticationManager
 import org.springframework.security.oauth2.client.endpoint.JwtBearerGrantRequest
@@ -25,19 +20,26 @@ import org.springframework.security.oauth2.client.endpoint.WebClientReactiveJwtB
 import org.springframework.security.oauth2.client.endpoint.WebClientReactiveRefreshTokenTokenResponseClient
 import org.springframework.security.oauth2.client.endpoint.WebClientReactiveTokenExchangeTokenResponseClient
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager
-import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
 
 @Configuration
 class OAuthConfig(
     private val customOidcService: CustomOidcService,
     private val customOAuthService: CustomOAuthService,
 ) {
+//    @Bean
+//    fun reactiveClientRegistrationRepository(
+//        dynamicRepo: DynamicReactiveClientRegistrationRepositoryImpl,
+//    ): ReactiveClientRegistrationRepository {
+//        return dynamicRepo
+//    }
+
     @Bean
     @Primary
-    fun oauth2LoginAuthenticationManager(): DelegatingReactiveAuthenticationManager {
+    fun oauth2LoginAuthenticationManager(
+        clientRegistrationRepository: ReactiveClientRegistrationRepository,
+    ): DelegatingReactiveAuthenticationManager {
         val oidcAuthorizationCodeReactiveAuthenticationManager = OidcAuthorizationCodeReactiveAuthenticationManager(
             authorizationCodeAccessTokenResponseClient(),
             customOidcService,

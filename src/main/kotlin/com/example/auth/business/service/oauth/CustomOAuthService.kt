@@ -33,9 +33,10 @@ class CustomOAuthService(
                 coroutineScope {
                     val registrationId = userRequest?.clientRegistration?.registrationId
                         ?: throw NotFoundRegistrationException(ErrorCode.NOT_FOUND_REGISTRATION, null)
-                    launch { application(oauth2User) }
-                    val convertUserJob =
-                        async { conventSocialUser(oauth2User, registrationId) }
+                    launch {
+                        application(oauth2User)
+                    }
+                    val convertUserJob = async { conventSocialUser(oauth2User, registrationId) }
                     val convertUser = convertUserJob.await()
                     launch { registerUserIfNotExist(convertUser) }
                     convertUser
@@ -44,25 +45,30 @@ class CustomOAuthService(
         }
     }
 
-    suspend fun conventSocialUser(user: OAuth2User, registrationId: String): SocialLoginUser = coroutineScope {
-        applicationOAuthService.convertSocialUser(user, registrationId)
-    }
+    suspend fun conventSocialUser(user: OAuth2User, registrationId: String): SocialLoginUser =
+        coroutineScope {
+            applicationOAuthService.convertSocialUser(user, registrationId)
+        }
 
     suspend fun application(user: OAuth2User) = coroutineScope {
     }
 
     suspend fun registerUserIfNotExist(user: SocialLoginUser) = coroutineScope {
-        endUserFinder.findBySocialIdAndProvider(
+        val userEntity = endUserFinder.findBySocialIdAndProvider(
             socialId = user.getId(),
             provider = user.getProvider(),
-        ) ?: run {
+        )
+        if (userEntity == null) {
             val registerUserCommand = RegisterUserCommand(
                 email = user.getEmail(),
                 password = "",
                 socialId = user.getId(),
                 provider = user.getProvider(),
             )
-            registrationService.registerUser(registerUserCommand)
+            val id = registrationService.registerUser(registerUserCommand)
+            user.setClaims(id)
+        } else {
+            user.setClaims(userEntity.id)
         }
     }
 }

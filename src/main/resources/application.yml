@@ -1,6 +1,13 @@
 spring:
   main:
     web-application-type: reactive
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      port: ${REDIS_PORT:6379}
+      repositories:
+        enabled: false
   r2dbc:
     url: r2dbc:mysql://${mysql.host}:3306/auth
     username: ${RDBMS_USERNAME}

@@ -8,4 +8,5 @@ interface ApplicationRepository : ReactiveCrudRepository<Application, String> {
     override fun <S : Application?> save(entity: S & Any): Mono<S> {
         return this.save(entity).doOnNext { it.markNotNew() }
     }
+    fun findByName(name: String): Mono<Application?>
 }

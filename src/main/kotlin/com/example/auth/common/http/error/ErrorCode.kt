@@ -27,6 +27,9 @@ enum class ErrorCode(
     // user
     NOT_FOUND_USER("user 를 찾을 수 없습니다", HttpStatus.BAD_REQUEST, LogLevel.WARN),
 
+    // application
+    NOT_FOUNT_APPLICATION("등록되어 있는 application 이 없습니다", BAD_REQUEST, LogLevel.WARN),
+
     UNKNOWN_ERROR("알 수 없는 에러", HttpStatus.INTERNAL_SERVER_ERROR, LogLevel.ERROR),
 }
 

@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseCookie
 import org.springframework.security.core.Authentication
+import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.web.server.WebFilterExchange
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
@@ -34,7 +35,7 @@ class OAuthAuthenticationSuccessHandler(
                     statusCode = HttpStatus.FOUND
                     addCookie(createCookie("accessToken", jwtResponse.accessToken, jwtResponse.accessTokenExpiresIn))
                     addCookie(createCookie("refreshToken", jwtResponse.refreshToken, jwtResponse.refreshTokenExpiresIn))
-                    headers.location = URI.create("https://find-my-pet-frontend.vercel.app")
+                    headers.location = URI.create(socialLoginUser.redirectUrl)
                 }
                 Mono.empty()
             }
