@@ -26,12 +26,14 @@ class CustomUserRepositoryImpl(
         const val PROVIDER_COLUMN = "provider"
         const val PASSWORD_COLUMN = "password"
         const val EMAIL_COLUMN = "email"
+        const val ROLE_COLUMN = "role"
 
         // bind value
         const val SOCIAL_ID_BIND = "socialId"
         const val PROVIDER_BIND = "provider"
         const val PASSWORD_BIND = "password"
         const val EMAIL_BIND = "email"
+        const val ROLE_BIND = "role"
     }
 
     override suspend fun findBySocialIdAndProvider(socialId: String, provider: String): User? {

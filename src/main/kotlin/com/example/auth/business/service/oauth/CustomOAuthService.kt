@@ -7,6 +7,7 @@ import com.example.auth.business.service.EndUserFinder
 import com.example.auth.business.service.RegistrationService
 import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.model.oauth.SocialLoginUser
+import com.example.auth.domain.model.user.Role
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -65,10 +66,10 @@ class CustomOAuthService(
                 socialId = user.getId(),
                 provider = user.getProvider(),
             )
-            val id = registrationService.registerUser(registerUserCommand)
-            user.setClaims(id)
+            val createUserEntity = registrationService.registerUser(registerUserCommand)
+            user.setClaims(createUserEntity.id, Role.from(createUserEntity.role))
         } else {
-            user.setClaims(userEntity.id)
+            user.setClaims(userEntity.id, Role.from(userEntity.role))
         }
     }
 }

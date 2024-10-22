@@ -23,7 +23,7 @@ class RegistrationController(
         @RequestBody
         request: RegistrationUserRequest,
     ): SucceededApiResponseBody<String> {
-        val response = registrationService.registerUser(request.toCommand())
+        val response = registrationService.registerUser(request.toCommand()).id
         return SucceededApiResponseBody(response)
     }
 

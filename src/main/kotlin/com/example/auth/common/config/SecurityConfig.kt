@@ -2,13 +2,17 @@ package com.example.auth.common.config
 
 import com.example.auth.business.service.JwtTokenGenerator
 import com.example.auth.business.service.oauth.OAuthAuthenticationSuccessHandler
+import com.example.auth.common.constants.AuthConstants
 import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepository
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
+import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -21,6 +25,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthorizationCodeReactiveAuthenticationManager
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter
@@ -44,7 +49,11 @@ class SecurityConfig(
     private val oauth2ClientAuthenticationManager: OAuth2AuthorizationCodeReactiveAuthenticationManager,
     private val dynamicReactiveClientRegistrationRepository: DynamicReactiveClientRegistrationRepository,
     private val jwtTokenGenerator: JwtTokenGenerator,
+    @Value("\${jwt.access-token.secret-key}")
+    private val accessTokenSecretKeyString: String,
 ) {
+    private val accessTokenSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessTokenSecretKeyString))
+
     companion object {
         val SWAGGER_WHITELIST = arrayOf(
             "/swagger-ui.html",
@@ -113,10 +122,7 @@ class SecurityConfig(
 //    }
     @Bean
     fun reactiveJwtDecoder(): ReactiveJwtDecoder {
-        val keyPair: KeyPair = generateRsaKey()
-        val publicKey: RSAPublicKey = keyPair.public as RSAPublicKey
-        return NimbusReactiveJwtDecoder.withPublicKey(publicKey)
-            .build()
+        return NimbusReactiveJwtDecoder.withSecretKey(accessTokenSecretKey).macAlgorithm(MacAlgorithm.HS512).build()
     }
 
     @Bean
@@ -143,7 +149,7 @@ class SecurityConfig(
 
     private fun jwtConverter(): ReactiveJwtAuthenticationConverterAdapter {
         val adapter = ReactiveJwtAuthenticationConverterAdapter { jwt ->
-            val authorities: List<String> = jwt.claims["authorities"]?.let {
+            val authorities: List<String> = jwt.claims[AuthConstants.USER_ROLE]?.let {
                 it as List<String>
             } ?: emptyList()
 

@@ -25,10 +25,10 @@ class RegistrationService(
     private val applicationDomainRepository: ApplicationDomainRepository,
     private val transactionalOperator: TransactionalOperator,
 ) {
-    suspend fun registerUser(command: RegisterUserCommand): String {
+    suspend fun registerUser(command: RegisterUserCommand): User {
         return transactionalOperator.execute {
             val user: User = User.fromCommand(command)
-            userRepository.save(user).thenReturn(user.id)
+            userRepository.save(user)
         }.awaitSingle()
     }
 

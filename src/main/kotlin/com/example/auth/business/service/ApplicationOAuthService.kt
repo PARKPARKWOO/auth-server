@@ -60,7 +60,6 @@ class ApplicationOAuthService(
             application?.let {
                 ClientRegistrationInfoDto(
                     id = applicationOAuth.id,
-//                    redirectUri = applicationOAuth.redirectUri,
                     applicationName = application.name,
                     clientSecret = applicationOAuth.clientSecret,
                     clientId = applicationOAuth.clientId,

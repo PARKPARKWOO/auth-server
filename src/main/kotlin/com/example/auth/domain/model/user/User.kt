@@ -4,6 +4,7 @@ import com.example.auth.business.command.RegisterUserCommand
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.EMAIL_COLUMN
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.PASSWORD_COLUMN
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.PROVIDER_COLUMN
+import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.ROLE_COLUMN
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.SOCIAL_ID_COLUMN
 import com.fasterxml.uuid.Generators
 import io.r2dbc.spi.Readable
@@ -29,6 +30,8 @@ class User(
     val socialId: String?,
     @Column("provider")
     val provider: String?,
+    @Column("role")
+    val role: String
 ) : Persistable<String> {
     @Column("created_at")
     @CreatedDate
@@ -58,6 +61,7 @@ class User(
             password = command.password,
             socialId = command.socialId,
             provider = command.provider?.name,
+            role = Role.ROLE_USER.name,
         )
 
         fun fromRow(row: Readable): User = User(
@@ -66,6 +70,7 @@ class User(
             provider = row.get(PROVIDER_COLUMN, String::class.java),
             password = row.get(PASSWORD_COLUMN, String::class.java) ?: "",
             email = row.get(EMAIL_COLUMN)?.toString(),
+            role = row.get(ROLE_COLUMN).toString()
         )
     }
 }

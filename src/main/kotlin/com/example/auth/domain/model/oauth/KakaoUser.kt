@@ -1,6 +1,7 @@
 package com.example.auth.domain.model.oauth
 
 import com.example.auth.common.constants.AuthConstants
+import com.example.auth.domain.model.user.Role
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.core.oidc.OidcIdToken
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo
@@ -12,6 +13,7 @@ data class KakaoUser(
     override val redirectUrl: String,
 ) : SocialLoginUser {
     private lateinit var userId: String
+    private lateinit var role: Role
     private fun getProperties(): LinkedHashMap<*, *> = oAuth2User.attributes["properties"] as LinkedHashMap<*, *>
     private fun getKakaoAccount(): LinkedHashMap<*, *> = oAuth2User.attributes["kakao_account"] as LinkedHashMap<*, *>
     override fun getId(): String = oAuth2User.name
@@ -22,13 +24,14 @@ data class KakaoUser(
     override fun getClaims(): Map<String, Any> {
         val claims = mutableMapOf<String, Any>()
         claims[AuthConstants.USER_ID] = userId
-//        claims[AuthConstants.USER_ROLE] = role
+        claims[AuthConstants.USER_ROLE] = role
         return claims
     }
 
     override fun getProvider(): SocialProvider = SocialProvider.KAKAO
-    override fun setClaims(userId: String) {
+    override fun setClaims(userId: String, role: Role) {
         this.userId = userId
+        this.role = role
     }
 
     override fun getName(): String {
