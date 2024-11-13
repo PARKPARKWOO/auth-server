@@ -5,6 +5,7 @@ import org.springframework.security.config.oauth2.client.CommonOAuth2Provider
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames
 
 data class ClientRegistrationInfoDto(
     val id: Long,
@@ -18,10 +19,14 @@ data class ClientRegistrationInfoDto(
         // https://www.googleapis.com/oauth2/v4/token 둘 중 하나임
         const val GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token"
         const val GOOGLE_USER_INFO_URI = "https://www.googleapis.com/oauth2/v3/userinfo"
+
+        // KAKAO
         const val KAKAO_AUTHORIZATION_URL = "https://kauth.kakao.com/oauth/authorize"
         const val KAKAO_TOKEN_URI = "https://kauth.kakao.com/oauth/token"
         const val KAKAO_USER_INFO_URI = "https://kapi.kakao.com/v2/user/me"
-
+        const val KAKAO_JWK_URI = "https://kauth.kakao.com/.well-known/jwks.json"
+        const val KAKAO_METADATA_URI = "https://kauth.kakao.com/.well-known/openid-configuration"
+        const val KAKAO_ISSUER_URI = "https://kauth.kakao.com"
         const val DEFAULT_REDIRECT_URL = "{baseUrl}/{action}/oauth2/code/{registrationId}"
 //        const val DEFAULT_REDIRECT_URL = "http://localhost:8080/oauth/authoirzation/kakao"
     }
@@ -35,16 +40,17 @@ data class ClientRegistrationInfoDto(
         ClientRegistration.withRegistrationId(id.toString())
 //            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .clientId(clientId)
+            .scope("openid")
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .tokenUri(KAKAO_TOKEN_URI)
             .redirectUri(DEFAULT_REDIRECT_URL)
             .userInfoUri(KAKAO_USER_INFO_URI)
+            .issuerUri(KAKAO_ISSUER_URI)
             .authorizationUri(KAKAO_AUTHORIZATION_URL)
+            .jwkSetUri(KAKAO_JWK_URI)
             .clientName(SocialProvider.KAKAO.clientNamePrefix + applicationName)
-            .userNameAttributeName("id")
-            .scope("")
+            .userNameAttributeName(IdTokenClaimNames.SUB)
             .build()
-
     private fun createGoogleClientRegistration(): ClientRegistration = CommonOAuth2Provider.GOOGLE
         .getBuilder(id.toString())
 //        .redirectUri(DEFAULT_REDIRECT_URL)

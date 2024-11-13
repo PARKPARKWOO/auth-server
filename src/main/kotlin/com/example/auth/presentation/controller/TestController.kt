@@ -1,4 +1,4 @@
-package com.example.auth.presentation
+package com.example.auth.presentation.controller
 
 import com.example.auth.business.service.ApplicationOAuthService
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto

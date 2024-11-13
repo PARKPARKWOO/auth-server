@@ -1,4 +1,4 @@
-package com.example.auth.presentation.request
+package com.example.auth.presentation.controller.request
 
 data class RegistrationApplicationRequest(
     val name: String,
