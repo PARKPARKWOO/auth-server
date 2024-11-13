@@ -1,4 +1,4 @@
-package com.example.auth.presentation
+package com.example.auth.presentation.controller
 
 import com.example.auth.business.service.ApplicationFinder
 import com.example.auth.common.http.response.SucceededApiResponseBody

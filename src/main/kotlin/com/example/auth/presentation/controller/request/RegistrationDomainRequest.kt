@@ -1,4 +1,4 @@
-package com.example.auth.presentation.request
+package com.example.auth.presentation.controller.request
 
 import com.example.auth.business.command.RegisterApplicationDomainCommand
 

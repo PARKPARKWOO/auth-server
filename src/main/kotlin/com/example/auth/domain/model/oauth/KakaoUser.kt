@@ -14,13 +14,13 @@ data class KakaoUser(
 ) : SocialLoginUser {
     private lateinit var userId: String
     private lateinit var role: Role
-    private fun getProperties(): LinkedHashMap<*, *> = oAuth2User.attributes["properties"] as LinkedHashMap<*, *>
-    private fun getKakaoAccount(): LinkedHashMap<*, *> = oAuth2User.attributes["kakao_account"] as LinkedHashMap<*, *>
+    private fun getProperties(): LinkedHashMap<*, *>? = oAuth2User.attributes["properties"] as? LinkedHashMap<*, *>
+    private fun getKakaoAccount(): LinkedHashMap<*, *>? = oAuth2User.attributes["kakao_account"] as? LinkedHashMap<*, *>
     override fun getId(): String = oAuth2User.name
 
-    override fun getNickname(): String = getProperties()["nickname"].toString()
+    override fun getNickname(): String = getProperties()?.get("nickname")?.toString() ?: ""
 
-    override fun getEmail(): String = getKakaoAccount()["email"].toString()
+    override fun getEmail(): String = attributes["email"].toString()
     override fun getClaims(): Map<String, Any> {
         val claims = mutableMapOf<String, Any>()
         claims[AuthConstants.USER_ID] = userId

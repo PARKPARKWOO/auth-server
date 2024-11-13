@@ -15,7 +15,8 @@ create table user
     provider   varchar(10)  null,
     created_at DATETIME     NOT NULL,
     updated_at DATETIME     NOT NULL,
-    deleted_at DATETIME     NULL
+    deleted_at DATETIME     NULL,
+    role       varchar(10)  not null
 );
 
 CREATE TABLE application_oauth_provider

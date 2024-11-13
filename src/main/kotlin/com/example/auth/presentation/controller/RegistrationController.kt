@@ -1,12 +1,12 @@
-package com.example.auth.presentation
+package com.example.auth.presentation.controller
 
 import com.example.auth.business.service.ApplicationOAuthService
 import com.example.auth.business.service.RegistrationService
 import com.example.auth.common.http.response.SucceededApiResponseBody
-import com.example.auth.presentation.request.RegistrationApplicationOAuthRequest
-import com.example.auth.presentation.request.RegistrationApplicationRequest
-import com.example.auth.presentation.request.RegistrationDomainRequest
-import com.example.auth.presentation.request.RegistrationUserRequest
+import com.example.auth.presentation.controller.request.RegistrationApplicationOAuthRequest
+import com.example.auth.presentation.controller.request.RegistrationApplicationRequest
+import com.example.auth.presentation.controller.request.RegistrationDomainRequest
+import com.example.auth.presentation.controller.request.RegistrationUserRequest
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
