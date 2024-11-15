@@ -31,7 +31,7 @@ class User(
     @Column("provider")
     val provider: String?,
     @Column("role")
-    val role: String
+    val role: String,
 ) : Persistable<String> {
     @Column("created_at")
     @CreatedDate
@@ -70,7 +70,7 @@ class User(
             provider = row.get(PROVIDER_COLUMN, String::class.java),
             password = row.get(PASSWORD_COLUMN, String::class.java) ?: "",
             email = row.get(EMAIL_COLUMN)?.toString(),
-            role = row.get(ROLE_COLUMN).toString()
+            role = row.get(ROLE_COLUMN).toString(),
         )
     }
 }

@@ -18,7 +18,13 @@ data class KakaoUser(
     private fun getKakaoAccount(): LinkedHashMap<*, *>? = oAuth2User.attributes["kakao_account"] as? LinkedHashMap<*, *>
     override fun getId(): String = oAuth2User.name
 
-    override fun getNickname(): String = getProperties()?.get("nickname")?.toString() ?: ""
+    override fun getNickname(): String {
+        val oidcUser = oAuth2User as? OidcUser
+        return oidcUser?.nickName
+            ?: getProperties()?.get("nickname")?.toString()
+            ?: oAuth2User.attributes["nickname"]?.toString()
+            ?: ""
+    }
 
     override fun getEmail(): String = attributes["email"].toString()
     override fun getClaims(): Map<String, Any> {
