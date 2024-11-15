@@ -10,4 +10,7 @@ class EndUserFinder(
 ) {
     suspend fun findBySocialIdAndProvider(socialId: String, provider: SocialProvider) =
         userRepository.findBySocialIdAndProvider(socialId = socialId, provider = provider.name)
+
+    suspend fun findByEmailAndProvider(provider: SocialProvider, email: String) =
+        userRepository.findByEmailAndProvider(provider = provider.name, email = email)
 }

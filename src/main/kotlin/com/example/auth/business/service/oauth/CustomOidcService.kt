@@ -7,6 +7,7 @@ import com.example.auth.business.service.EndUserFinder
 import com.example.auth.business.service.RegistrationService
 import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.model.oauth.SocialLoginUser
+import com.example.auth.domain.model.oauth.SocialProvider
 import com.example.auth.domain.model.user.Role
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -31,17 +32,15 @@ class CustomOidcService(
         val loadUser = oidcReactiveOAuth2UserService.loadUser(userRequest)
         return loadUser.flatMap { oauth2User ->
             mono {
-                coroutineScope {
-                    val registrationId = userRequest?.clientRegistration?.registrationId
-                        ?: throw NotFoundRegistrationException(ErrorCode.NOT_FOUND_REGISTRATION, null)
-                    launch {
-                        application(oauth2User)
-                    }
-                    val convertUserJob = async { conventSocialUser(oauth2User, registrationId) }
-                    val convertUser = convertUserJob.await()
-                    launch { registerUserIfNotExist(convertUser) }
-                    convertUser
+                val registrationId = userRequest?.clientRegistration?.registrationId
+                    ?: throw NotFoundRegistrationException(ErrorCode.NOT_FOUND_REGISTRATION, null)
+                launch {
+                    application(oauth2User)
                 }
+                val convertUserJob = async { conventSocialUser(oauth2User, registrationId) }
+                val convertUser = convertUserJob.await()
+                launch { registerUserIfNotExist(convertUser) }
+                convertUser
             }
         }
     }
@@ -54,22 +53,38 @@ class CustomOidcService(
     suspend fun application(user: OAuth2User) = coroutineScope {
     }
 
-    suspend fun registerUserIfNotExist(user: SocialLoginUser) = coroutineScope {
-        val userEntity = endUserFinder.findBySocialIdAndProvider(
-            socialId = user.getId(),
-            provider = user.getProvider(),
-        )
+    suspend fun registerUserIfNotExist(user: SocialLoginUser) {
+        val userEntity = when (user.getProvider()) {
+            SocialProvider.KAKAO -> {
+                endUserFinder.findByEmailAndProvider(
+                    provider = user.getProvider(),
+                    email = user.email,
+                )
+            }
+
+            else -> {
+                endUserFinder.findBySocialIdAndProvider(
+                    socialId = user.getId(),
+                    provider = user.getProvider(),
+                )
+            }
+        }
+
         if (userEntity == null) {
-            val registerUserCommand = RegisterUserCommand(
-                email = user.getEmail(),
-                password = "",
-                socialId = user.getId(),
-                provider = user.getProvider(),
-            )
-            val createUser = registrationService.registerUser(registerUserCommand)
-            user.setClaims(createUser.id, Role.from(createUser.role))
+            register(user)
         } else {
             user.setClaims(userEntity.id, Role.from(userEntity.role))
         }
+    }
+
+    suspend fun register(user: SocialLoginUser) {
+        val registerUserCommand = RegisterUserCommand(
+            email = user.getEmail(),
+            password = "",
+            socialId = user.getId(),
+            provider = user.getProvider(),
+        )
+        val createUser = registrationService.registerUser(registerUserCommand)
+        user.setClaims(createUser.id, Role.from(createUser.role))
     }
 }

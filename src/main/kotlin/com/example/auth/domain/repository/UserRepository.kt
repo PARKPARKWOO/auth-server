@@ -15,6 +15,8 @@ interface UserRepository : ReactiveCrudRepository<User, UUID>, CustomUserReposit
 
 interface CustomUserRepository {
     suspend fun findBySocialIdAndProvider(socialId: String, provider: String): User?
+
+    suspend fun findByEmailAndProvider(provider: String, email: String): User?
 }
 
 class CustomUserRepositoryImpl(
@@ -39,6 +41,17 @@ class CustomUserRepositoryImpl(
     override suspend fun findBySocialIdAndProvider(socialId: String, provider: String): User? {
         return databaseClient.sql("SELECT * FROM user WHERE $SOCIAL_ID_COLUMN = :$SOCIAL_ID_BIND AND $PROVIDER_COLUMN = :$PROVIDER_BIND")
             .bind(SOCIAL_ID_BIND, socialId)
+            .bind(PROVIDER_BIND, provider)
+            .map { row ->
+                User.fromRow(row)
+            }
+            .one()
+            .awaitSingleOrNull()
+    }
+
+    override suspend fun findByEmailAndProvider(provider: String, email: String): User? {
+        return databaseClient.sql("SELECT * FROM user WHERE $EMAIL_COLUMN = :$EMAIL_BIND AND $PROVIDER_COLUMN = :$PROVIDER_BIND")
+            .bind(EMAIL_BIND, email)
             .bind(PROVIDER_BIND, provider)
             .map { row ->
                 User.fromRow(row)
