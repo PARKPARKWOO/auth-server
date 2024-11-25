@@ -76,6 +76,15 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
+    // log-loki
+    implementation("com.github.loki4j:loki-logback-appender:1.5.1")
+
+    // for metric
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+
+    runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.9.0")
+
     configurations {
         all {
             exclude(group = "org.springframework.boot", module = "spring-boot-starter-web")
