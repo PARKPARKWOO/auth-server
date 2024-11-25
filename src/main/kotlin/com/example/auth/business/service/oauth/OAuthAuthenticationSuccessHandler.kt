@@ -3,7 +3,6 @@ package com.example.auth.business.service.oauth
 import com.example.auth.business.service.JwtTokenGenerator
 import com.example.auth.business.service.dto.JwtResponseDto
 import com.example.auth.common.context.RequestContextUtil
-import com.example.auth.common.context.withReactorContext
 import com.example.auth.domain.model.oauth.SocialLoginUser
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.reactor.awaitSingle
@@ -45,18 +44,16 @@ class OAuthAuthenticationSuccessHandler(
     }
 
     private suspend fun ServerHttpResponse.sendJwtResponseAsRedirect(jwtResponse: JwtResponseDto, redirectUrl: String) {
-        withReactorContext {
-            val isJson = RequestContextUtil.isMobileDevice()
-            println(isJson)
-            println(RequestContextUtil.getTraceId())
+//        withReactorContext {
+        val isJson = RequestContextUtil.isMobileDevice()
 
-            if (isJson) {
-                this.sendJwtResponseAsJson(jwtResponse)
-            } else {
-                this.sendJwtResponseAsCookie(jwtResponse)
-                this.setRedirectConfiguration(redirectUrl)
-            }
+        if (isJson) {
+            this.sendJwtResponseAsJson(jwtResponse)
+        } else {
+            this.sendJwtResponseAsCookie(jwtResponse)
+            this.setRedirectConfiguration(redirectUrl)
         }
+//        }
     }
 
     private suspend fun ServerHttpResponse.sendJwtResponseAsCookie(jwtResponse: JwtResponseDto) {

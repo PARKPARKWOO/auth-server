@@ -12,7 +12,6 @@ import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -37,7 +36,6 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
-import org.springframework.web.server.WebFilter
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
@@ -55,11 +53,9 @@ class SecurityConfig(
     private val jwtTokenGenerator: JwtTokenGenerator,
     @Value("\${jwt.access-token.secret-key}")
     private val accessTokenSecretKeyString: String,
+    val loggingFilter: LoggingFilter,
 ) {
     private val accessTokenSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessTokenSecretKeyString))
-
-    @Autowired
-    lateinit var loggingFilter: LoggingFilter
 
     companion object {
         val SWAGGER_WHITELIST = arrayOf(
@@ -75,7 +71,7 @@ class SecurityConfig(
         http: ServerHttpSecurity,
     ): SecurityWebFilterChain {
         return http.csrf { csrf -> csrf.disable() }
-            .addFilterBefore(loggingFilter, SecurityWebFiltersOrder.FIRST)
+            .addFilterBefore(loggingFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .authorizeExchange { exchange ->
                 exchange.pathMatchers("/**", "/login").permitAll() // 로그인 페이지와 루트는 허용
                 exchange.pathMatchers("/api/v1/auth/**").permitAll()
