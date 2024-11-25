@@ -20,6 +20,13 @@ spring:
     user: ${spring.r2dbc.username}
     password: ${spring.r2dbc.password}
     locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
 #logging:
 #  level:
 #    root: debug
