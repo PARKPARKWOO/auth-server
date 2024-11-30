@@ -7,11 +7,11 @@ import com.example.auth.business.service.EndUserFinder
 import com.example.auth.business.service.RegistrationService
 import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.model.oauth.SocialLoginUser
-import com.example.auth.domain.entity.user.Role
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactor.mono
+import model.Role
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService

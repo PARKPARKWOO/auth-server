@@ -1,7 +1,7 @@
 package com.example.auth.domain.model.oauth
 
 import com.example.auth.common.constants.AuthConstants
-import com.example.auth.domain.entity.user.Role
+import model.Role
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.core.oidc.OidcIdToken
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo
@@ -13,6 +13,7 @@ data class GoogleUser(
     override val redirectUrl: String,
 ) : SocialLoginUser {
     private lateinit var userId: String
+
     private lateinit var role: Role
     override fun getId(): String = oAuth2User.name
 

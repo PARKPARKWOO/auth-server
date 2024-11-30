@@ -8,11 +8,11 @@ import com.example.auth.business.service.RegistrationService
 import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.model.oauth.SocialLoginUser
 import com.example.auth.domain.model.oauth.SocialProvider
-import com.example.auth.domain.entity.user.Role
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactor.mono
+import model.Role
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService

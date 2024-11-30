@@ -8,6 +8,7 @@ import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.ROL
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.SOCIAL_ID_COLUMN
 import com.fasterxml.uuid.Generators
 import io.r2dbc.spi.Readable
+import model.Role
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
@@ -80,7 +81,7 @@ class User(
             email = email,
             password = password,
             provider = provider,
-            role = role,
+            role = Role.from(role),
             socialId = socialId,
             createdAt = createdAt,
             updatedAt = updatedAt,
