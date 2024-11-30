@@ -1,6 +1,6 @@
 package com.example.auth.domain.repository
 
-import com.example.auth.domain.model.user.User
+import com.example.auth.domain.entity.user.User
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import org.springframework.r2dbc.core.DatabaseClient

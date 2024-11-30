@@ -1,6 +1,6 @@
 package com.example.auth.business.service
 
-import com.example.auth.domain.model.application.Application
+import com.example.auth.domain.entity.application.Application
 import com.example.auth.domain.repository.ApplicationRepository
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Service

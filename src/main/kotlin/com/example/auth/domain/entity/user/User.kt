@@ -1,4 +1,4 @@
-package com.example.auth.domain.model.user
+package com.example.auth.domain.entity.user
 
 import com.example.auth.business.command.RegisterUserCommand
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.EMAIL_COLUMN
@@ -71,6 +71,20 @@ class User(
             password = row.get(PASSWORD_COLUMN, String::class.java) ?: "",
             email = row.get(EMAIL_COLUMN)?.toString(),
             role = row.get(ROLE_COLUMN).toString(),
+        )
+    }
+
+    fun toModel(): model.User {
+        return model.User(
+            id = id,
+            email = email,
+            password = password,
+            provider = provider,
+            role = role,
+            socialId = socialId,
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+            deletedAt = deletedAt,
         )
     }
 }

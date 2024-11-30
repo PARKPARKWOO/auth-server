@@ -16,9 +16,21 @@ java {
 
 repositories {
     mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/PARKPARKWOO/common-module")
+        credentials {
+            username = project.findProperty("gpr.user")?.toString() ?: System.getenv("GITHUB_USERNAME")
+            password = project.findProperty("gpr.key")?.toString() ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
 }
 
 dependencies {
+    implementation("org.woo:domain-auth:+")
+    implementation("org.woo:http:+")
+    implementation("org.woo:mapper:+")
+
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

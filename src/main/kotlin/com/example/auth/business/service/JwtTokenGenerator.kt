@@ -1,9 +1,9 @@
 package com.example.auth.business.service
 
 import com.example.auth.business.exception.ParseJwtFailedException
-import com.example.auth.business.service.dto.JwtResponseDto
 import com.example.auth.common.constants.AuthConstants
 import com.example.auth.common.http.error.ErrorCode
+import dto.JwtResponseDto
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Header
 import io.jsonwebtoken.JwtException

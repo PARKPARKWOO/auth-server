@@ -1,4 +1,4 @@
-package com.example.auth.domain.model.application
+package com.example.auth.domain.entity.application
 
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table

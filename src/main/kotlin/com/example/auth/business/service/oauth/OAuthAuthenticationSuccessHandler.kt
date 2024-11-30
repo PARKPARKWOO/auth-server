@@ -1,10 +1,10 @@
 package com.example.auth.business.service.oauth
 
 import com.example.auth.business.service.JwtTokenGenerator
-import com.example.auth.business.service.dto.JwtResponseDto
 import com.example.auth.common.context.RequestContextUtil
 import com.example.auth.domain.model.oauth.SocialLoginUser
 import com.fasterxml.jackson.databind.ObjectMapper
+import dto.JwtResponseDto
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.core.io.buffer.DataBuffer

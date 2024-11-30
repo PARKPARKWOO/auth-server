@@ -3,10 +3,10 @@ package com.example.auth.business.service
 import com.example.auth.business.command.RegisterApplicationDomainCommand
 import com.example.auth.business.command.RegisterApplicationOAuthProviderCommand
 import com.example.auth.business.command.RegisterUserCommand
-import com.example.auth.domain.model.application.Application
-import com.example.auth.domain.model.application.ApplicationDomain
-import com.example.auth.domain.model.application.ApplicationOAuthProvider
-import com.example.auth.domain.model.user.User
+import com.example.auth.domain.entity.application.Application
+import com.example.auth.domain.entity.application.ApplicationDomain
+import com.example.auth.domain.entity.application.ApplicationOAuthProvider
+import com.example.auth.domain.entity.user.User
 import com.example.auth.domain.repository.ApplicationDomainRepository
 import com.example.auth.domain.repository.ApplicationOAuthProviderRepository
 import com.example.auth.domain.repository.ApplicationRepository

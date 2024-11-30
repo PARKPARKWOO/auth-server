@@ -1,4 +1,4 @@
-package com.example.auth.domain.model.user
+package com.example.auth.domain.entity.user
 
 enum class Role {
     ROLE_USER,

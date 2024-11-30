@@ -1,4 +1,4 @@
-package com.example.auth.domain.model.application
+package com.example.auth.domain.entity.application
 
 import com.example.auth.domain.model.oauth.SocialProvider
 import org.springframework.data.annotation.Id

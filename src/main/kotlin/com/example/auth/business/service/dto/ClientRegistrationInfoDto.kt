@@ -4,7 +4,6 @@ import com.example.auth.domain.model.oauth.SocialProvider
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.core.AuthorizationGrantType
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames
 
 data class ClientRegistrationInfoDto(

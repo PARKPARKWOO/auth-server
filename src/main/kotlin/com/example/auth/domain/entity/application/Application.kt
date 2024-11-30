@@ -1,4 +1,4 @@
-package com.example.auth.domain.model.application
+package com.example.auth.domain.entity.application
 
 import com.fasterxml.uuid.Generators
 import org.springframework.data.annotation.Id

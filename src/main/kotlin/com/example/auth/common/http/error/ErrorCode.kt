@@ -1,10 +1,10 @@
 package com.example.auth.common.http.error
 
-import com.example.auth.common.http.response.FailedApiResponseBody
 import org.springframework.boot.logging.LogLevel
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatusCode
+import org.woo.http.FailedApiResponseBody
 
 enum class ErrorCode(
     val message: String,

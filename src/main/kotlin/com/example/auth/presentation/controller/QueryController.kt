@@ -1,12 +1,12 @@
 package com.example.auth.presentation.controller
 
 import com.example.auth.business.service.ApplicationFinder
-import com.example.auth.common.http.response.SucceededApiResponseBody
-import com.example.auth.domain.model.application.Application
+import com.example.auth.domain.entity.application.Application
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.woo.http.SucceededApiResponseBody
 
 @RestController
 @RequestMapping("/api/v1/auth")

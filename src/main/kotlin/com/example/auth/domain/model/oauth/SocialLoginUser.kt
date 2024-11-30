@@ -1,6 +1,6 @@
 package com.example.auth.domain.model.oauth
 
-import com.example.auth.domain.model.user.Role
+import com.example.auth.domain.entity.user.Role
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.core.user.OAuth2User
 
