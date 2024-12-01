@@ -1,7 +1,6 @@
 package com.example.auth.business.service.oauth
 
 import com.example.auth.business.service.JwtTokenGenerator
-import com.example.auth.common.context.RequestContextUtil
 import com.example.auth.domain.model.oauth.SocialLoginUser
 import com.fasterxml.jackson.databind.ObjectMapper
 import dto.JwtResponseDto
@@ -16,6 +15,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.web.server.WebFilterExchange
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
+import org.woo.log.context.ReactorContextHolder
 import reactor.core.publisher.Mono
 import java.net.URI
 import java.time.Duration
@@ -45,7 +45,7 @@ class OAuthAuthenticationSuccessHandler(
 
     private suspend fun ServerHttpResponse.sendJwtResponseAsRedirect(jwtResponse: JwtResponseDto, redirectUrl: String) {
 //        withReactorContext {
-        val isJson = RequestContextUtil.isMobileDevice()
+        val isJson = ReactorContextHolder.isMobileDevice()
 
         if (isJson) {
             this.sendJwtResponseAsJson(jwtResponse)
