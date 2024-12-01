@@ -28,9 +28,10 @@ repositories {
 
 dependencies {
 //    implementation("org.woo:domain-auth:+")
-    implementation("org.woo:domain-auth:0.0.3-SNAPSHOT")
+    implementation("org.woo:domain-auth:0.0.5-SNAPSHOT")
     implementation("org.woo:http:+")
     implementation("org.woo:mapper:+")
+    implementation("org.woo:log:+")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

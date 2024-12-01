@@ -1,10 +1,10 @@
 package com.example.auth.common.context
 
-import com.example.auth.common.constants.ContextConstant.IS_MOBILE
-import com.example.auth.common.constants.ContextConstant.TRACE_ID
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.ReactorContext
 import kotlinx.coroutines.withContext
+import org.woo.log.constant.ContextConstant.IS_MOBILE
+import org.woo.log.constant.ContextConstant.TRACE_ID
 import reactor.core.publisher.Mono
 import reactor.util.context.Context
 

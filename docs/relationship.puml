@@ -1,0 +1,27 @@
+@startuml
+actor User
+actor Application
+
+rectangle Auth-Server {
+    usecase "Login" as UC_Login
+    usecase "Access Resource" as UC_AccessResource
+    usecase "SSO" as UC_SSO
+}
+
+rectangle OAuthProvider {
+    usecase "Authenticate" as UC_Authenticate
+}
+
+User --> UC_Login : "Login to App"
+User --> UC_AccessResource : "Access Resources"
+Application --> UC_Login : "Redirect for Login"
+Application --> UC_AccessResource : "Request Resources"
+
+UC_Login --> UC_SSO : "SSO Token"
+UC_SSO --> UC_Authenticate : "Delegate Authentication"
+UC_Authenticate --> OAuthProvider : "OAuth Authentication"
+UC_SSO --> Application : "Share SSO Token"
+UC_AccessResource --> UC_SSO : "Validate SSO Token"
+
+User --> (Multiple Applications)
+@enduml

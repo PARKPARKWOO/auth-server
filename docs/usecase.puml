@@ -1,14 +1,25 @@
 @startuml
-'https://plantuml.com/sequence-diagram
+actor Developer
 
-autonumber 
-developer -> auth_server: Register Application
-database auth_db
-auth_server -> auth_db: Insert
-developer -> oauth_provider: Register Application
-oauth_provider --> developer: client-id & client-secret
-developer -> auth_server: Register OAuth Provider client-id & client-secret
-auth_server -> auth_db: Insert
-auth_db --> auth_server: OAuth ClientRegistrationId
-auth_server --> developer: OAuth ClientRegistrationId
+rectangle "Auth Server" {
+    usecase "Register Application" as UC_RegisterApp
+    usecase "Store OAuth Client Info" as UC_StoreClientInfo
+}
+
+rectangle "OAuth Provider" {
+    usecase "Register Application at Provider" as UC_RegisterAtProvider
+}
+
+rectangle "Auth Database" {
+    usecase "Insert Application Data" as UC_InsertAppData
+    usecase "Insert OAuth Client Info" as UC_InsertClientInfo
+}
+
+Developer --> UC_RegisterApp : "Register Application"
+UC_RegisterApp --> UC_InsertAppData : "Store in Database"
+Developer --> UC_RegisterAtProvider : "Register at OAuth Provider"
+UC_RegisterAtProvider --> Developer : "Receive client-id & client-secret"
+Developer --> UC_StoreClientInfo : "Store client-id & client-secret"
+UC_StoreClientInfo --> UC_InsertClientInfo : "Save in Database"
+
 @enduml

@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber 
+developer -> auth_server: Register Application
+database auth_db
+auth_server -> auth_db: Insert
+developer -> oauth_provider: Register Application
+oauth_provider --> developer: client-id & client-secret
+developer -> auth_server: Register OAuth Provider client-id & client-secret
+auth_server -> auth_db: Insert
+auth_db --> auth_server: OAuth ClientRegistrationId
+auth_server --> developer: OAuth ClientRegistrationId
+@enduml
