@@ -1,6 +1,7 @@
 package com.example.auth.domain.model.oauth
 
 import com.example.auth.common.constants.AuthConstants
+import com.example.auth.domain.model.application.RedirectType
 import model.Role
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.core.oidc.OidcIdToken
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 data class GoogleUser(
     val oAuth2User: OAuth2User,
     override val redirectUrl: String,
+    override val redirectType: RedirectType,
 ) : SocialLoginUser {
     private lateinit var userId: String
 

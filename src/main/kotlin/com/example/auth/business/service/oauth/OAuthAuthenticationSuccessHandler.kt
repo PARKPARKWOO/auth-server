@@ -1,6 +1,7 @@
 package com.example.auth.business.service.oauth
 
 import com.example.auth.business.service.JwtTokenGenerator
+import com.example.auth.domain.model.application.RedirectType
 import com.example.auth.domain.model.oauth.SocialLoginUser
 import com.fasterxml.jackson.databind.ObjectMapper
 import dto.JwtResponseDto
@@ -34,7 +35,11 @@ class OAuthAuthenticationSuccessHandler(
             mono {
                 val response = webFilterExchange.exchange.response
                 val jwtResponse = generateJwtToken(socialLoginUser.getClaims())
-                response.sendJwtResponseAsRedirect(jwtResponse, socialLoginUser.redirectUrl)
+                response.sendJwtResponseAsRedirect(
+                    jwtResponse = jwtResponse,
+                    redirectUrl = socialLoginUser.redirectUrl,
+                    redirectType = socialLoginUser.redirectType,
+                )
             }.then()
         }
     }
@@ -43,17 +48,20 @@ class OAuthAuthenticationSuccessHandler(
         return jwtTokenGenerator.build(claims)
     }
 
-    private suspend fun ServerHttpResponse.sendJwtResponseAsRedirect(jwtResponse: JwtResponseDto, redirectUrl: String) {
-//        withReactorContext {
-        val isJson = ReactorContextHolder.isMobileDevice()
-
-        if (isJson) {
-            this.sendJwtResponseAsJson(jwtResponse)
-        } else {
-            this.sendJwtResponseAsCookie(jwtResponse)
-            this.setRedirectConfiguration(redirectUrl)
-        }
-//        }
+    private suspend fun ServerHttpResponse.sendJwtResponseAsRedirect(
+        jwtResponse: JwtResponseDto,
+        redirectUrl: String?,
+        redirectType: RedirectType,
+    ) {
+        val isJson = ReactorContextHolder.isMobileDevice() || redirectType == RedirectType.JSON
+        redirectUrl?.let {
+            if (isJson) {
+                this.sendJwtResponseAsJson(jwtResponse)
+            } else {
+                this.sendJwtResponseAsCookie(jwtResponse)
+                this.setRedirectConfiguration(redirectUrl)
+            }
+        } ?: this.sendJwtResponseAsJson(jwtResponse)
     }
 
     private suspend fun ServerHttpResponse.sendJwtResponseAsCookie(jwtResponse: JwtResponseDto) {

@@ -18,6 +18,8 @@ class Application(
     val name: String,
     @Column("redirect_url")
     val redirectUrl: String,
+    @Column("redirect_type")
+    val redirectType: String,
     @Column("created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
 ) : Persistable<String> {

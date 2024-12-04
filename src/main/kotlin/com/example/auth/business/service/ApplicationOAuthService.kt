@@ -4,6 +4,7 @@ import com.example.auth.business.command.RegisterApplicationOAuthProviderCommand
 import com.example.auth.business.exception.BusinessException
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto
 import com.example.auth.common.http.error.ErrorCode
+import com.example.auth.domain.model.application.RedirectType
 import com.example.auth.domain.model.oauth.GoogleUser
 import com.example.auth.domain.model.oauth.KakaoUser
 import com.example.auth.domain.model.oauth.SocialLoginUser
@@ -99,8 +100,8 @@ class ApplicationOAuthService(
         val application = applicationFinder.findById(oAuth2Provider.applicationId)
             ?: throw BusinessException(ErrorCode.NOT_FOUNT_APPLICATION, null)
         return when (oAuth2Provider.provider) {
-            KAKAO -> KakaoUser(oAuth2User, application.redirectUrl)
-            GOOGLE -> GoogleUser(oAuth2User, application.redirectUrl)
+            KAKAO -> KakaoUser(oAuth2User, application.redirectUrl, RedirectType.valueOf(application.redirectType))
+            GOOGLE -> GoogleUser(oAuth2User, application.redirectUrl, RedirectType.valueOf(application.redirectType))
         }
     }
 }

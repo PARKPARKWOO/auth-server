@@ -7,6 +7,7 @@ import com.example.auth.domain.entity.application.Application
 import com.example.auth.domain.entity.application.ApplicationDomain
 import com.example.auth.domain.entity.application.ApplicationOAuthProvider
 import com.example.auth.domain.entity.user.User
+import com.example.auth.domain.model.application.RedirectType
 import com.example.auth.domain.repository.ApplicationDomainRepository
 import com.example.auth.domain.repository.ApplicationOAuthProviderRepository
 import com.example.auth.domain.repository.ApplicationRepository
@@ -32,11 +33,12 @@ class RegistrationService(
         }.awaitSingle()
     }
 
-    suspend fun registerApplication(name: String, redirectUrl: String): String {
+    suspend fun registerApplication(name: String, redirectUrl: String, redirectType: RedirectType): String {
         return transactionalOperator.execute {
             val application = Application(
                 name = name,
                 redirectUrl = redirectUrl,
+                redirectType = redirectType.name,
             )
             applicationRepository.save(application).thenReturn(application.id)
         }.awaitSingle()

@@ -35,6 +35,7 @@ class RegistrationController(
         val response = registrationService.registerApplication(
             name = request.name,
             redirectUrl = request.redirectUrl,
+            redirectType = request.redirectType,
         )
         return SucceededApiResponseBody(response)
     }
