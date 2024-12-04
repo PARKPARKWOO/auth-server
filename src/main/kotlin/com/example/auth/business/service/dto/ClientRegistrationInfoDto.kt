@@ -26,7 +26,8 @@ data class ClientRegistrationInfoDto(
         const val KAKAO_JWK_URI = "https://kauth.kakao.com/.well-known/jwks.json"
         const val KAKAO_METADATA_URI = "https://kauth.kakao.com/.well-known/openid-configuration"
         const val KAKAO_ISSUER_URI = "https://kauth.kakao.com"
-        const val DEFAULT_REDIRECT_URL = "{baseUrl}/{action}/oauth2/code/{registrationId}"
+        private const val BASE_URL = "https://woo-auth.duckdns.org"
+        const val DEFAULT_REDIRECT_URL = "$BASE_URL/{action}/oauth2/code/{registrationId}"
 //        const val DEFAULT_REDIRECT_URL = "http://localhost:8080/oauth/authoirzation/kakao"
     }
 
