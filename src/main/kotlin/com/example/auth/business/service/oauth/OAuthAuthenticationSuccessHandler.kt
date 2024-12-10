@@ -16,7 +16,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.web.server.WebFilterExchange
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
-import org.woo.log.context.ReactorContextHolder
 import reactor.core.publisher.Mono
 import java.net.URI
 import java.time.Duration
@@ -53,7 +52,7 @@ class OAuthAuthenticationSuccessHandler(
         redirectUrl: String?,
         redirectType: RedirectType,
     ) {
-        val isJson = ReactorContextHolder.isMobileDevice() || redirectType == RedirectType.JSON
+//        val isJson = ReactorContextHolder.isMobileDevice() || redirectType == RedirectType.JSON
         redirectUrl?.let {
 //            if (isJson) {
 //                this.sendJwtResponseAsJson(jwtResponse)
