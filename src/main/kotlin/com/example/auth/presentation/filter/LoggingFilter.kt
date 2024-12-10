@@ -18,6 +18,7 @@ class LoggingFilter : AbstractReactiveMDCInitializationFilter() {
 
     override fun customizeContext(context: Context, exchange: ServerWebExchange): Context {
         val request = exchange.request
+        println(request.path)
         val userAgent = request.headers.getFirst("User-Agent") ?: ""
         val isMobile = isMobileDevice(userAgent)
         return super.customizeContext(context, exchange)

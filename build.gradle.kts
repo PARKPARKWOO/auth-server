@@ -26,6 +26,8 @@ repositories {
     }
 }
 
+extra["springCloudVersion"] = "2023.0.0"
+
 dependencies {
 //    implementation("org.woo:domain-auth:+")
     implementation("org.woo:domain-auth:0.0.5-SNAPSHOT")
@@ -99,10 +101,17 @@ dependencies {
 
     runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.9.0")
 
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     configurations {
         all {
             exclude(group = "org.springframework.boot", module = "spring-boot-starter-web")
         }
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
     }
 }
 

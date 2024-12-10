@@ -55,13 +55,27 @@ class OAuthAuthenticationSuccessHandler(
     ) {
         val isJson = ReactorContextHolder.isMobileDevice() || redirectType == RedirectType.JSON
         redirectUrl?.let {
-            if (isJson) {
-                this.sendJwtResponseAsJson(jwtResponse)
-            } else {
-                this.sendJwtResponseAsCookie(jwtResponse)
-                this.setRedirectConfiguration(redirectUrl)
-            }
+//            if (isJson) {
+//                this.sendJwtResponseAsJson(jwtResponse)
+//            } else {
+//                this.sendJwtResponseAsCookie(jwtResponse)
+            this.setRedirectConfigurationWithQueryParams(redirectUrl, jwtResponse)
+//            this.setRedirectConfiguration(redirectUrl)
+//            }
         } ?: this.sendJwtResponseAsJson(jwtResponse)
+    }
+
+    private suspend fun ServerHttpResponse.setRedirectConfigurationWithQueryParams(
+        redirectUrl: String,
+        jwtResponse: JwtResponseDto,
+    ) {
+        val uri = URI.create(redirectUrl)
+        val queryParams = uri.query?.let { "$it&" } ?: ""
+        val updatedUrl = URI.create(
+            "${uri.scheme}://${uri.authority}${uri.path}?${queryParams}accessToken=${jwtResponse.accessToken}&refreshToken=${jwtResponse.refreshToken}&accessTokenExpiresIn=${jwtResponse.accessTokenExpiresIn}&refreshTokenExpiresIn=${jwtResponse.refreshTokenExpiresIn}",
+        )
+        this.headers.location = updatedUrl
+        this.statusCode = HttpStatus.FOUND
     }
 
     private suspend fun ServerHttpResponse.sendJwtResponseAsCookie(jwtResponse: JwtResponseDto) {
@@ -91,7 +105,6 @@ class OAuthAuthenticationSuccessHandler(
         this.headers.contentType = MediaType.APPLICATION_JSON
         val jsonByte = mapper.writeValueAsBytes(jwtResponse)
         val buffer: DataBuffer = bufferFactory().wrap(jsonByte)
-
         this.writeWith(Mono.just(buffer)).awaitSingle()
     }
 }
