@@ -8,11 +8,14 @@ data class RegistrationUserRequest(
     val password: String = "",
     val socialId: String?,
     val provider: SocialProvider?,
+    val name: String,
 ) {
-    fun toCommand(): RegisterUserCommand = RegisterUserCommand(
-        email = email,
-        password = password,
-        socialId = socialId,
-        provider = provider,
-    )
+    fun toCommand(): RegisterUserCommand =
+        RegisterUserCommand(
+            email = email,
+            password = password,
+            socialId = socialId,
+            provider = provider,
+            name = name,
+        )
 }

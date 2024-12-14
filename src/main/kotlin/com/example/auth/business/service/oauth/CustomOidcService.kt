@@ -4,6 +4,7 @@ import com.example.auth.business.command.RegisterUserCommand
 import com.example.auth.business.exception.NotFoundRegistrationException
 import com.example.auth.business.service.ApplicationOAuthService
 import com.example.auth.business.service.EndUserFinder
+import com.example.auth.business.service.EndUserWriter
 import com.example.auth.business.service.RegistrationService
 import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.model.oauth.SocialLoginUser
@@ -26,64 +27,73 @@ class CustomOidcService(
     private val applicationOAuthService: ApplicationOAuthService,
     private val endUserFinder: EndUserFinder,
     private val registrationService: RegistrationService,
+    private val endUserWriter: EndUserWriter,
 ) : ReactiveOAuth2UserService<OidcUserRequest, OidcUser> {
     override fun loadUser(userRequest: OidcUserRequest?): Mono<OidcUser> {
         val oidcReactiveOAuth2UserService = OidcReactiveOAuth2UserService()
         val loadUser = oidcReactiveOAuth2UserService.loadUser(userRequest)
         return loadUser.flatMap { oauth2User ->
             mono {
-                val registrationId = userRequest?.clientRegistration?.registrationId
-                    ?: throw NotFoundRegistrationException(ErrorCode.NOT_FOUND_REGISTRATION, null)
+                val registrationId =
+                    userRequest?.clientRegistration?.registrationId
+                        ?: throw NotFoundRegistrationException(ErrorCode.NOT_FOUND_REGISTRATION, null)
                 launch {
                     application(oauth2User)
                 }
-                val convertUserJob = async { conventSocialUser(oauth2User, registrationId) }
-                val convertUser = convertUserJob.await()
-                launch { registerUserIfNotExist(convertUser) }
+                val convertUser = async { convertSocialUser(oauth2User, registrationId) }.await()
+                registerUserIfNotExist(convertUser)
                 convertUser
             }
         }
     }
 
-    suspend fun conventSocialUser(user: OidcUser, registrationId: String): SocialLoginUser =
+    suspend fun convertSocialUser(
+        user: OidcUser,
+        registrationId: String,
+    ): SocialLoginUser =
         coroutineScope {
             applicationOAuthService.convertSocialUser(user, registrationId)
         }
 
-    suspend fun application(user: OAuth2User) = coroutineScope {
-    }
+    suspend fun application(user: OAuth2User) =
+        coroutineScope {
+        }
 
     suspend fun registerUserIfNotExist(user: SocialLoginUser) {
-        val userEntity = when (user.getProvider()) {
-            SocialProvider.KAKAO -> {
-                endUserFinder.findByEmailAndProvider(
-                    provider = user.getProvider(),
-                    email = user.email,
-                )
-            }
+        val userEntity =
+            when (user.getProvider()) {
+                SocialProvider.KAKAO -> {
+                    endUserFinder.findByEmailAndProvider(
+                        provider = user.getProvider(),
+                        email = user.email,
+                    )
+                }
 
-            else -> {
-                endUserFinder.findBySocialIdAndProvider(
-                    socialId = user.getId(),
-                    provider = user.getProvider(),
-                )
+                else -> {
+                    endUserFinder.findBySocialIdAndProvider(
+                        socialId = user.getId(),
+                        provider = user.getProvider(),
+                    )
+                }
             }
-        }
 
         if (userEntity == null) {
             register(user)
         } else {
             user.setClaims(userEntity.id, Role.from(userEntity.role))
+            endUserWriter.update(userEntity, user)
         }
     }
 
     suspend fun register(user: SocialLoginUser) {
-        val registerUserCommand = RegisterUserCommand(
-            email = user.getEmail(),
-            password = "",
-            socialId = user.getId(),
-            provider = user.getProvider(),
-        )
+        val registerUserCommand =
+            RegisterUserCommand(
+                email = user.getEmail(),
+                password = "",
+                socialId = user.getId(),
+                provider = user.getProvider(),
+                name = user.name,
+            )
         val createUser = registrationService.registerUser(registerUserCommand)
         user.setClaims(createUser.id, Role.from(createUser.role))
     }

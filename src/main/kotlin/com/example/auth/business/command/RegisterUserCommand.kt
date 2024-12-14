@@ -7,4 +7,5 @@ data class RegisterUserCommand(
     val password: String,
     val socialId: String?,
     val provider: SocialProvider?,
+    val name: String?,
 )

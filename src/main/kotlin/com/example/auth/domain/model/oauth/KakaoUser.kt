@@ -19,18 +19,20 @@ data class KakaoUser(
     private lateinit var role: Role
 
     private fun getProperties(): LinkedHashMap<*, *>? = oAuth2User.attributes["properties"] as? LinkedHashMap<*, *>
+
     private fun getKakaoAccount(): LinkedHashMap<*, *>? = oAuth2User.attributes["kakao_account"] as? LinkedHashMap<*, *>
+
     override fun getId(): String = oAuth2User.name
 
-    override fun getNickname(): String {
+    override fun getNickname(): String? {
         val oidcUser = oAuth2User as? OidcUser
         return oidcUser?.nickName
             ?: getProperties()?.get("nickname")?.toString()
             ?: oAuth2User.attributes["nickname"]?.toString()
-            ?: ""
     }
 
     override fun getEmail(): String = attributes["email"].toString()
+
     override fun getClaims(): Map<String, Any> {
         val claims = mutableMapOf<String, Any>()
         claims[AuthConstants.USER_ID] = userId
@@ -39,22 +41,20 @@ data class KakaoUser(
     }
 
     override fun getProvider(): SocialProvider = SocialProvider.KAKAO
-    override fun setClaims(userId: String, role: Role) {
+
+    override fun setClaims(
+        userId: String,
+        role: Role,
+    ) {
         this.userId = userId
         this.role = role
     }
 
-    override fun getName(): String {
-        return oAuth2User.name
-    }
+    override fun getName(): String = oAuth2User.name
 
-    override fun getAttributes(): MutableMap<String, Any> {
-        return oAuth2User.attributes
-    }
+    override fun getAttributes(): MutableMap<String, Any> = oAuth2User.attributes
 
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        return oAuth2User.authorities
-    }
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = oAuth2User.authorities
 
     override fun getUserInfo(): OidcUserInfo? {
         val oidcUser = oAuth2User as? OidcUser

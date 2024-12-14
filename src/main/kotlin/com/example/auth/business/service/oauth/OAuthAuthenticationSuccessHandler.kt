@@ -29,8 +29,9 @@ class OAuthAuthenticationSuccessHandler(
         authentication: Authentication?,
     ): Mono<Void> {
         return Mono.defer {
-            val socialLoginUser = authentication?.principal as? SocialLoginUser
-                ?: return@defer Mono.error<Void>(IllegalArgumentException("Authentication principal is not valid"))
+            val socialLoginUser =
+                authentication?.principal as? SocialLoginUser
+                    ?: return@defer Mono.error<Void>(IllegalArgumentException("Authentication principal is not valid"))
             mono {
                 val response = webFilterExchange.exchange.response
                 val jwtResponse = generateJwtToken(socialLoginUser.getClaims())
@@ -43,9 +44,7 @@ class OAuthAuthenticationSuccessHandler(
         }
     }
 
-    private suspend fun generateJwtToken(claims: Map<String, Any>): JwtResponseDto {
-        return jwtTokenGenerator.build(claims)
-    }
+    private suspend fun generateJwtToken(claims: Map<String, Any>): JwtResponseDto = jwtTokenGenerator.build(claims)
 
     private suspend fun ServerHttpResponse.sendJwtResponseAsRedirect(
         jwtResponse: JwtResponseDto,
@@ -70,9 +69,10 @@ class OAuthAuthenticationSuccessHandler(
     ) {
         val uri = URI.create(redirectUrl)
         val queryParams = uri.query?.let { "$it&" } ?: ""
-        val updatedUrl = URI.create(
-            "${uri.scheme}://${uri.authority}${uri.path}?${queryParams}accessToken=${jwtResponse.accessToken}&refreshToken=${jwtResponse.refreshToken}&accessTokenExpiresIn=${jwtResponse.accessTokenExpiresIn}&refreshTokenExpiresIn=${jwtResponse.refreshTokenExpiresIn}",
-        )
+        val updatedUrl =
+            URI.create(
+                "${uri.scheme}://${uri.authority}${uri.path}?${queryParams}accessToken=${jwtResponse.accessToken}&refreshToken=${jwtResponse.refreshToken}&accessTokenExpiresIn=${jwtResponse.accessTokenExpiresIn}&refreshTokenExpiresIn=${jwtResponse.refreshTokenExpiresIn}",
+            )
         this.headers.location = updatedUrl
         this.statusCode = HttpStatus.FOUND
     }
@@ -84,15 +84,19 @@ class OAuthAuthenticationSuccessHandler(
         }
     }
 
-    private fun createCookie(name: String, value: String, maxAge: Long): ResponseCookie {
-        return ResponseCookie.from(name, value)
+    private fun createCookie(
+        name: String,
+        value: String,
+        maxAge: Long,
+    ): ResponseCookie =
+        ResponseCookie
+            .from(name, value)
             .httpOnly(true)
 //            .secure(true)
             .path("/")
             .maxAge(Duration.ofMillis(maxAge))
             .sameSite("Strict")
             .build()
-    }
 
     private suspend fun ServerHttpResponse.setRedirectConfiguration(redirectUrl: String) {
         this.headers.location = URI.create(redirectUrl)

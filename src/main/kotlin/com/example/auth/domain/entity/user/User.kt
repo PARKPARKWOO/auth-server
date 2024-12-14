@@ -2,6 +2,7 @@ package com.example.auth.domain.entity.user
 
 import com.example.auth.business.command.RegisterUserCommand
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.EMAIL_COLUMN
+import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.NAME_COLUMN
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.PASSWORD_COLUMN
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.PROVIDER_COLUMN
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.ROLE_COLUMN
@@ -33,6 +34,8 @@ class User(
     val provider: String?,
     @Column("role")
     val role: String,
+    @Column("name")
+    val name: String?,
 ) : Persistable<String> {
     @Column("created_at")
     @CreatedDate
@@ -47,6 +50,7 @@ class User(
 
     @Transient
     private var newEntity: Boolean = true
+
     override fun getId() = id
 
     @Transient
@@ -57,26 +61,30 @@ class User(
     }
 
     companion object {
-        fun fromCommand(command: RegisterUserCommand): User = User(
-            email = command.email,
-            password = command.password,
-            socialId = command.socialId,
-            provider = command.provider?.name,
-            role = Role.ROLE_USER.name,
-        )
+        fun fromCommand(command: RegisterUserCommand): User =
+            User(
+                email = command.email,
+                password = command.password,
+                socialId = command.socialId,
+                provider = command.provider?.name,
+                role = Role.ROLE_USER.name,
+                name = command.name,
+            )
 
-        fun fromRow(row: Readable): User = User(
-            id = row.get("id", String::class.java)!!,
-            socialId = row.get(SOCIAL_ID_COLUMN, String::class.java),
-            provider = row.get(PROVIDER_COLUMN, String::class.java),
-            password = row.get(PASSWORD_COLUMN, String::class.java) ?: "",
-            email = row.get(EMAIL_COLUMN)?.toString(),
-            role = row.get(ROLE_COLUMN).toString(),
-        )
+        fun fromRow(row: Readable): User =
+            User(
+                id = row.get("id", String::class.java)!!,
+                socialId = row.get(SOCIAL_ID_COLUMN, String::class.java),
+                provider = row.get(PROVIDER_COLUMN, String::class.java),
+                password = row.get(PASSWORD_COLUMN, String::class.java) ?: "",
+                email = row.get(EMAIL_COLUMN)?.toString(),
+                role = row.get(ROLE_COLUMN).toString(),
+                name = row.get(NAME_COLUMN).toString(),
+            )
     }
 
-    fun toModel(): model.User {
-        return model.User(
+    fun toModel(): model.User =
+        model.User(
             id = id,
             email = email,
             password = password,
@@ -87,5 +95,14 @@ class User(
             updatedAt = updatedAt,
             deletedAt = deletedAt,
         )
+
+    fun updateEmail(email: String?): String? {
+        if (this.email != email) return email
+        return null
+    }
+
+    fun updateName(name: String?): String? {
+        if (this.name != name) return name
+        return null
     }
 }

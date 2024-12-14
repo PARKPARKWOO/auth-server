@@ -7,10 +7,12 @@ import com.example.auth.business.service.EndUserFinder
 import com.example.auth.business.service.RegistrationService
 import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.model.oauth.SocialLoginUser
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.withContext
 import model.Role
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
@@ -31,12 +33,11 @@ class CustomOAuthService(
 
         return loadUser.flatMap { oauth2User ->
             mono {
-                coroutineScope {
-                    val registrationId = userRequest?.clientRegistration?.registrationId
+                val registrationId =
+                    userRequest?.clientRegistration?.registrationId
                         ?: throw NotFoundRegistrationException(ErrorCode.NOT_FOUND_REGISTRATION, null)
-                    launch {
-                        application(oauth2User)
-                    }
+                withContext(Dispatchers.IO) {
+                    launch { application(oauth2User) }
                     val convertUserJob = async { conventSocialUser(oauth2User, registrationId) }
                     val convertUser = convertUserJob.await()
                     launch { registerUserIfNotExist(convertUser) }
@@ -46,30 +47,38 @@ class CustomOAuthService(
         }
     }
 
-    suspend fun conventSocialUser(user: OAuth2User, registrationId: String): SocialLoginUser =
+    suspend fun conventSocialUser(
+        user: OAuth2User,
+        registrationId: String,
+    ): SocialLoginUser =
         coroutineScope {
             applicationOAuthService.convertSocialUser(user, registrationId)
         }
 
-    suspend fun application(user: OAuth2User) = coroutineScope {
-    }
-
-    suspend fun registerUserIfNotExist(user: SocialLoginUser) = coroutineScope {
-        val userEntity = endUserFinder.findBySocialIdAndProvider(
-            socialId = user.getId(),
-            provider = user.getProvider(),
-        )
-        if (userEntity == null) {
-            val registerUserCommand = RegisterUserCommand(
-                email = user.getEmail(),
-                password = "",
-                socialId = user.getId(),
-                provider = user.getProvider(),
-            )
-            val createUserEntity = registrationService.registerUser(registerUserCommand)
-            user.setClaims(createUserEntity.id, Role.from(createUserEntity.role))
-        } else {
-            user.setClaims(userEntity.id, Role.from(userEntity.role))
+    suspend fun application(user: OAuth2User) =
+        coroutineScope {
         }
-    }
+
+    suspend fun registerUserIfNotExist(user: SocialLoginUser) =
+        coroutineScope {
+            val userEntity =
+                endUserFinder.findBySocialIdAndProvider(
+                    socialId = user.getId(),
+                    provider = user.getProvider(),
+                )
+            if (userEntity == null) {
+                val registerUserCommand =
+                    RegisterUserCommand(
+                        email = user.getEmail(),
+                        password = "",
+                        socialId = user.getId(),
+                        provider = user.getProvider(),
+                        name = "",
+                    )
+                val createUserEntity = registrationService.registerUser(registerUserCommand)
+                user.setClaims(createUserEntity.id, Role.from(createUserEntity.role))
+            } else {
+                user.setClaims(userEntity.id, Role.from(userEntity.role))
+            }
+        }
 }

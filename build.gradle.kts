@@ -58,7 +58,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     runtimeOnly("com.mysql:mysql-connector-j")
-    implementation("io.asyncer:r2dbc-mysql:1.2.0")
+    implementation("io.asyncer:r2dbc-mysql:1.3.0")
 
     // swagger-ui
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0")

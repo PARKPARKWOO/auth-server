@@ -27,20 +27,22 @@ data class ClientRegistrationInfoDto(
         const val KAKAO_METADATA_URI = "https://kauth.kakao.com/.well-known/openid-configuration"
         const val KAKAO_ISSUER_URI = "https://kauth.kakao.com"
 
-        private const val BASE_URL = "https://woo-auth.duckdns.org"
+//        private const val BASE_URL = "https://woo-auth.duckdns.org"
 
-        //                private const val BASE_URL = "http://localhost:8080"
+        private const val BASE_URL = "http://localhost:8080"
         const val DEFAULT_REDIRECT_URL = "$BASE_URL/{action}/oauth2/code/{registrationId}"
 //        const val DEFAULT_REDIRECT_URL = "http://localhost:8080/oauth/authoirzation/kakao"
     }
 
-    fun toClientRegistration(): ClientRegistration = when (this.provider) {
-        SocialProvider.GOOGLE -> createGoogleClientRegistration()
-        SocialProvider.KAKAO -> createKakaoClientRegistration()
-    }
+    fun toClientRegistration(): ClientRegistration =
+        when (this.provider) {
+            SocialProvider.GOOGLE -> createGoogleClientRegistration()
+            SocialProvider.KAKAO -> createKakaoClientRegistration()
+        }
 
     private fun createKakaoClientRegistration(): ClientRegistration =
-        ClientRegistration.withRegistrationId(id.toString())
+        ClientRegistration
+            .withRegistrationId(id.toString())
 //            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .clientId(clientId)
             .scope("openid")
@@ -55,11 +57,12 @@ data class ClientRegistrationInfoDto(
             .userNameAttributeName(IdTokenClaimNames.SUB)
             .build()
 
-    private fun createGoogleClientRegistration(): ClientRegistration = CommonOAuth2Provider.GOOGLE
-        .getBuilder(id.toString())
+    private fun createGoogleClientRegistration(): ClientRegistration =
+        CommonOAuth2Provider.GOOGLE
+            .getBuilder(id.toString())
 //        .redirectUri(DEFAULT_REDIRECT_URL)
-        .clientId(clientId)
-        .clientSecret(clientSecret)
-        .clientName(SocialProvider.GOOGLE.clientNamePrefix + applicationName)
-        .build()
+            .clientId(clientId)
+            .clientSecret(clientSecret)
+            .clientName(SocialProvider.GOOGLE.clientNamePrefix + applicationName)
+            .build()
 }
