@@ -1,4 +1,4 @@
-package com.example.auth.presentation.filter
+package com.example.auth.presentation.rest.filter
 
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component

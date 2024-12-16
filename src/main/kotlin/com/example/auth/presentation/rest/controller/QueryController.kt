@@ -1,4 +1,4 @@
-package com.example.auth.presentation.controller
+package com.example.auth.presentation.rest.controller
 
 import com.example.auth.business.service.ApplicationFinder
 import com.example.auth.domain.entity.application.Application

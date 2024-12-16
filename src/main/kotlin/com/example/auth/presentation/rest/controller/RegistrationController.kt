@@ -1,11 +1,11 @@
-package com.example.auth.presentation.controller
+package com.example.auth.presentation.rest.controller
 
 import com.example.auth.business.service.ApplicationOAuthService
 import com.example.auth.business.service.RegistrationService
-import com.example.auth.presentation.controller.request.RegistrationApplicationOAuthRequest
-import com.example.auth.presentation.controller.request.RegistrationApplicationRequest
-import com.example.auth.presentation.controller.request.RegistrationDomainRequest
-import com.example.auth.presentation.controller.request.RegistrationUserRequest
+import com.example.auth.presentation.rest.controller.request.RegistrationApplicationOAuthRequest
+import com.example.auth.presentation.rest.controller.request.RegistrationApplicationRequest
+import com.example.auth.presentation.rest.controller.request.RegistrationDomainRequest
+import com.example.auth.presentation.rest.controller.request.RegistrationUserRequest
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -32,11 +32,12 @@ class RegistrationController(
         @RequestBody
         request: RegistrationApplicationRequest,
     ): SucceededApiResponseBody<String> {
-        val response = registrationService.registerApplication(
-            name = request.name,
-            redirectUrl = request.redirectUrl,
-            redirectType = request.redirectType,
-        )
+        val response =
+            registrationService.registerApplication(
+                name = request.name,
+                redirectUrl = request.redirectUrl,
+                redirectType = request.redirectType,
+            )
         return SucceededApiResponseBody(response)
     }
 

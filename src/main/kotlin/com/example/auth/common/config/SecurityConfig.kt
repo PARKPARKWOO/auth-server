@@ -1,10 +1,10 @@
 package com.example.auth.common.config
 
-import com.example.auth.business.service.JwtTokenGenerator
+import com.example.auth.business.service.JwtTokenService
 import com.example.auth.business.service.oauth.OAuthAuthenticationSuccessHandler
 import com.example.auth.common.constants.AuthConstants
 import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepository
-import com.example.auth.presentation.filter.LoggingFilter
+import com.example.auth.presentation.rest.filter.LoggingFilter
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet
@@ -50,7 +50,7 @@ class SecurityConfig(
     private val oauth2LoginAuthenticationManager: DelegatingReactiveAuthenticationManager,
     private val oauth2ClientAuthenticationManager: OAuth2AuthorizationCodeReactiveAuthenticationManager,
     private val dynamicReactiveClientRegistrationRepository: DynamicReactiveClientRegistrationRepository,
-    private val jwtTokenGenerator: JwtTokenGenerator,
+    private val jwtTokenService: JwtTokenService,
     @Value("\${jwt.access-token.secret-key}")
     private val accessTokenSecretKeyString: String,
     val loggingFilter: LoggingFilter,
@@ -58,28 +58,32 @@ class SecurityConfig(
     private val accessTokenSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessTokenSecretKeyString))
 
     companion object {
-        val SWAGGER_WHITELIST = arrayOf(
-            "/swagger-ui.html",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/webjars/**",
-        )
+        val SWAGGER_WHITELIST =
+            arrayOf(
+                "/swagger-ui.html",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/webjars/**",
+            )
     }
 
     @Bean
-    fun filterChain(
-        http: ServerHttpSecurity,
-    ): SecurityWebFilterChain {
-        return http.csrf { csrf -> csrf.disable() }
+    fun filterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
+        http
+            .csrf { csrf -> csrf.disable() }
             .addFilterBefore(loggingFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .authorizeExchange { exchange ->
                 exchange.pathMatchers("/**", "/login").permitAll() // 로그인 페이지와 루트는 허용
-                exchange.pathMatchers("/api/v1/auth/**").permitAll()
-                    .pathMatchers(*SWAGGER_WHITELIST).permitAll()
-                    .pathMatchers(HttpMethod.OPTIONS).permitAll()
-                    .anyExchange().authenticated()
-            }
-            .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                exchange
+                    .pathMatchers("/api/v1/auth/**")
+                    .permitAll()
+                    .pathMatchers(*SWAGGER_WHITELIST)
+                    .permitAll()
+                    .pathMatchers(HttpMethod.OPTIONS)
+                    .permitAll()
+                    .anyExchange()
+                    .authenticated()
+            }.formLogin(ServerHttpSecurity.FormLoginSpec::disable)
             .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
             .oauth2ResourceServer { oauth2 ->
 //                oauth2.jwt(Customizer.withDefaults())
@@ -87,34 +91,30 @@ class SecurityConfig(
                     jwt.jwtDecoder(reactiveJwtDecoder())
                     jwt.jwtAuthenticationConverter(jwtConverter())
                 }
-            }
-            .oauth2Login { oauth2Login ->
+            }.oauth2Login { oauth2Login ->
                 oauth2Login.authenticationManager(oauth2LoginAuthenticationManager)
                 oauth2Login.clientRegistrationRepository(dynamicReactiveClientRegistrationRepository)
                 oauth2Login.authenticationSuccessHandler(oAuth2AuthenticationSuccessHandler())
-            }
-            .oauth2Client { oauth2Client ->
+            }.oauth2Client { oauth2Client ->
                 oauth2Client.authenticationManager(oauth2ClientAuthenticationManager)
-            }
-            .build()
-    }
+            }.build()
 
     @Bean
-    fun oAuth2AuthenticationSuccessHandler(): ServerAuthenticationSuccessHandler {
-        return OAuthAuthenticationSuccessHandler(jwtTokenGenerator)
-    }
+    fun oAuth2AuthenticationSuccessHandler(): ServerAuthenticationSuccessHandler = OAuthAuthenticationSuccessHandler(jwtTokenService)
 
     @Bean
     fun corsWebFilter(): CorsWebFilter {
-        val config = CorsConfiguration().apply {
-            allowedOrigins = listOf("*")
-            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            allowedHeaders = listOf("Authorization", "Content-Type")
-        }
+        val config =
+            CorsConfiguration().apply {
+                allowedOrigins = listOf("*")
+                allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                allowedHeaders = listOf("Authorization", "Content-Type")
+            }
 
-        val source = UrlBasedCorsConfigurationSource().apply {
-            registerCorsConfiguration("/**", config)
-        }
+        val source =
+            UrlBasedCorsConfigurationSource().apply {
+                registerCorsConfiguration("/**", config)
+            }
 
         return CorsWebFilter(source)
     }
@@ -125,19 +125,20 @@ class SecurityConfig(
 //            .build()
 //    }
     @Bean
-    fun reactiveJwtDecoder(): ReactiveJwtDecoder {
-        return NimbusReactiveJwtDecoder.withSecretKey(accessTokenSecretKey).macAlgorithm(MacAlgorithm.HS512).build()
-    }
+    fun reactiveJwtDecoder(): ReactiveJwtDecoder =
+        NimbusReactiveJwtDecoder.withSecretKey(accessTokenSecretKey).macAlgorithm(MacAlgorithm.HS512).build()
 
     @Bean
     fun jwkSource(): JWKSource<SecurityContext> {
         val keyPair: KeyPair = generateRsaKey()
         val publicKey: RSAPublicKey = keyPair.public as RSAPublicKey
         val privateKey: RSAPrivateKey = keyPair.private as RSAPrivateKey
-        val rsaKey: RSAKey = RSAKey.Builder(publicKey)
-            .privateKey(privateKey)
-            .keyID(UUID.randomUUID().toString())
-            .build()
+        val rsaKey: RSAKey =
+            RSAKey
+                .Builder(publicKey)
+                .privateKey(privateKey)
+                .keyID(UUID.randomUUID().toString())
+                .build()
         val jwkSet = JWKSet(rsaKey)
         return ImmutableJWKSet(jwkSet)
     }
@@ -152,22 +153,22 @@ class SecurityConfig(
         }
 
     private fun jwtConverter(): ReactiveJwtAuthenticationConverterAdapter {
-        val adapter = ReactiveJwtAuthenticationConverterAdapter { jwt ->
-            val authorities: List<String> = jwt.claims[AuthConstants.USER_ROLE]?.let {
-                it as List<String>
-            } ?: emptyList()
+        val adapter =
+            ReactiveJwtAuthenticationConverterAdapter { jwt ->
+                val authorities: List<String> =
+                    jwt.claims[AuthConstants.USER_ROLE]?.let {
+                        it as List<String>
+                    } ?: emptyList()
 
-            UsernamePasswordAuthenticationToken(
-                jwt.subject,
-                "n/a",
-                authorities.map { SimpleGrantedAuthority(it) },
-            )
-        }
+                UsernamePasswordAuthenticationToken(
+                    jwt.subject,
+                    "n/a",
+                    authorities.map { SimpleGrantedAuthority(it) },
+                )
+            }
         return adapter
     }
 
     @Bean
-    fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder()
-    }
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 }

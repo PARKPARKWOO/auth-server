@@ -52,3 +52,6 @@ jwt:
   refresh-token:
     secret-key: ${REFRESH_SECRET_KEY}
     expire-millis: ${REFRESH_EXPIRE_MILLIS}
+grpc:
+  server:
+    port: 9090

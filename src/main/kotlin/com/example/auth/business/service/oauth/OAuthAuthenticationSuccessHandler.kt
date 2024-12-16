@@ -1,6 +1,6 @@
 package com.example.auth.business.service.oauth
 
-import com.example.auth.business.service.JwtTokenGenerator
+import com.example.auth.business.service.JwtTokenService
 import com.example.auth.domain.model.application.RedirectType
 import com.example.auth.domain.model.oauth.SocialLoginUser
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -22,7 +22,7 @@ import java.time.Duration
 
 @Component
 class OAuthAuthenticationSuccessHandler(
-    private val jwtTokenGenerator: JwtTokenGenerator,
+    private val jwtTokenService: JwtTokenService,
 ) : ServerAuthenticationSuccessHandler {
     override fun onAuthenticationSuccess(
         webFilterExchange: WebFilterExchange,
@@ -44,7 +44,7 @@ class OAuthAuthenticationSuccessHandler(
         }
     }
 
-    private suspend fun generateJwtToken(claims: Map<String, Any>): JwtResponseDto = jwtTokenGenerator.build(claims)
+    private suspend fun generateJwtToken(claims: Map<String, Any>): JwtResponseDto = jwtTokenService.build(claims)
 
     private suspend fun ServerHttpResponse.sendJwtResponseAsRedirect(
         jwtResponse: JwtResponseDto,

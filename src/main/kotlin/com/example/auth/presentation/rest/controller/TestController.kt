@@ -1,4 +1,4 @@
-package com.example.auth.presentation.controller
+package com.example.auth.presentation.rest.controller
 
 import com.example.auth.business.service.ApplicationOAuthService
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto
@@ -13,7 +13,6 @@ class TestController(
     private val applicationOAuthService: ApplicationOAuthService,
 ) {
     @GetMapping("/test2")
-    suspend fun getDto(request: ServerHttpRequest): List<ClientRegistrationInfoDto> {
-        return applicationOAuthService.findClientRegistrationInfoDto()
-    }
+    suspend fun getDto(request: ServerHttpRequest): List<ClientRegistrationInfoDto> =
+        applicationOAuthService.findClientRegistrationInfoDto()
 }

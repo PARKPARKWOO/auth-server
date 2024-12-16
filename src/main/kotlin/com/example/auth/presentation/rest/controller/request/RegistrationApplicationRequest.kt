@@ -1,4 +1,4 @@
-package com.example.auth.presentation.controller.request
+package com.example.auth.presentation.rest.controller.request
 
 import com.example.auth.domain.model.application.RedirectType
 

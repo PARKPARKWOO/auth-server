@@ -6,10 +6,9 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.r2dbc.core.awaitRowsUpdated
 import reactor.core.publisher.Mono
-import java.util.UUID
 
 interface UserRepository :
-    ReactiveCrudRepository<User, UUID>,
+    ReactiveCrudRepository<User, String>,
     CustomUserRepository {
     override fun <S : User?> save(entity: S & Any): Mono<S> = this.save(entity).doOnNext { it.markNotNew() }
 }

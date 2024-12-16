@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
+    id("com.google.protobuf") version "0.9.4"
 }
 
 group = "com.example"
@@ -25,12 +26,12 @@ repositories {
         }
     }
 }
-
+val grpcVersion = "1.58.0"
 extra["springCloudVersion"] = "2023.0.0"
 
 dependencies {
 //    implementation("org.woo:domain-auth:+")
-    implementation("org.woo:domain-auth:0.0.5-SNAPSHOT")
+    implementation("org.woo:domain-auth:0.0.6-SNAPSHOT")
     implementation("org.woo:http:+")
     implementation("org.woo:mapper:+")
     implementation("org.woo:log:0.0.2-SNAPSHOT")
@@ -107,6 +108,20 @@ dependencies {
             exclude(group = "org.springframework.boot", module = "spring-boot-starter-web")
         }
     }
+
+    // grpc
+    implementation("org.woo:grpc:0.0.1-SNAPSHOT")
+    implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
+    // https://mvnrepository.com/artifact/net.devh/grpc-spring-boot-starter
+//    implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")
+    implementation("net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE") {
+        exclude(group = "io.grpc", module = "grpc-netty-shaded")
+        exclude(group = "io.grpc", module = "grpc-protobuf")
+        exclude(group = "io.grpc", module = "grpc-")
+    }
+    implementation("io.grpc:grpc-protobuf:$grpcVersion")
+    implementation("io.grpc:grpc-stub:$grpcVersion")
+//    implementation("net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE")
 }
 
 dependencyManagement {

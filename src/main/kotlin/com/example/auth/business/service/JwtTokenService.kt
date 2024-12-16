@@ -18,7 +18,7 @@ import java.util.UUID
 import com.example.auth.business.exception.ExpiredJwtException as CustomExpiredJwtException
 
 @Service
-class JwtTokenGenerator(
+class JwtTokenService(
     @Value("\${jwt.access-token.secret-key}")
     private val accessTokenSecretKeyString: String,
     @Value("\${jwt.refresh-token.secret-key}")
@@ -44,7 +44,8 @@ class JwtTokenGenerator(
 
     suspend fun buildAccessToken(claims: Map<String, Any>): String {
         val now = System.currentTimeMillis()
-        return Jwts.builder()
+        return Jwts
+            .builder()
             .setHeader(Jwts.header().setType(Header.JWT_TYPE))
             .setClaims(claims)
             .setExpiration(Date((now + accessTokenExpireTime)))
@@ -53,13 +54,13 @@ class JwtTokenGenerator(
                 accessTokenSecretKey,
 //                SignatureAlgorithm.ES512,
                 SignatureAlgorithm.HS512,
-            )
-            .compact()
+            ).compact()
     }
 
     suspend fun buildRefreshToken(claims: Map<String, Any>): String {
         val now = System.currentTimeMillis()
-        return Jwts.builder()
+        return Jwts
+            .builder()
             .setHeader(Jwts.header().setType(Header.JWT_TYPE))
             .setClaims(claims)
             .setExpiration(Date((now + refreshTokenExpireTime)))
@@ -67,13 +68,13 @@ class JwtTokenGenerator(
             .signWith(
                 refreshTokenSecretKey,
                 SignatureAlgorithm.HS512,
-            )
-            .compact()
+            ).compact()
     }
 
-    suspend fun parseAccessToken(token: String): Map<String, Any> {
-        return try {
-            Jwts.parserBuilder()
+    fun parseAccessToken(token: String): Map<String, Any> =
+        try {
+            Jwts
+                .parserBuilder()
                 .setSigningKey(accessTokenSecretKey)
                 .build()
                 .parseClaimsJws(token)
@@ -83,11 +84,11 @@ class JwtTokenGenerator(
         } catch (e: JwtException) {
             throw ParseJwtFailedException(ErrorCode.PARSE_JWT_FAILED, e)
         }
-    }
 
-    suspend fun parseRefreshToken(refreshToken: String): Map<String, Any> {
-        return try {
-            Jwts.parserBuilder()
+    suspend fun parseRefreshToken(refreshToken: String): Map<String, Any> =
+        try {
+            Jwts
+                .parserBuilder()
                 .setSigningKey(refreshTokenSecretKey)
                 .build()
                 .parseClaimsJws(refreshToken)
@@ -97,10 +98,12 @@ class JwtTokenGenerator(
         } catch (e: JwtException) {
             throw ParseJwtFailedException(ErrorCode.PARSE_JWT_FAILED, e)
         }
-    }
 
-    suspend fun getUserIdByRefreshToken(refreshToken: String): UUID =
+    suspend fun getUserIdFromRefreshToken(refreshToken: String): UUID =
         UUID.fromString(parseRefreshToken(refreshToken)[AuthConstants.USER_ID].toString())
+
+    fun getUserIdFromAccessTokenToken(refreshToken: String): UUID =
+        UUID.fromString(parseAccessToken(refreshToken)[AuthConstants.USER_ID].toString())
 
     companion object {
         fun minKeyStringLength(algorithm: SignatureAlgorithm) = algorithm.minKeyLength.let { (it + 5) / 6 }
