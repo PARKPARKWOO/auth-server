@@ -1,3 +1,5 @@
+import com.google.protobuf.gradle.id
+
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
@@ -26,6 +28,8 @@ repositories {
         }
     }
 }
+
+val protobufVersion = "3.23.4"
 val grpcVersion = "1.58.0"
 extra["springCloudVersion"] = "2023.0.0"
 
@@ -121,6 +125,13 @@ dependencies {
     }
     implementation("io.grpc:grpc-protobuf:$grpcVersion")
     implementation("io.grpc:grpc-stub:$grpcVersion")
+    if (JavaVersion.current().isJava9Compatible()) {
+        // Workaround for @javax.annotation.Generated
+        // see: https://github.com/grpc/grpc-java/issues/3633
+        implementation("javax.annotation:javax.annotation-api:1.3.1")
+    } else {
+        compileOnly("jakarta.annotation:jakarta.annotation-api:$protobufVersion") // Java 9+ compatibility - Do NOT update to 2.0.0
+    }
 //    implementation("net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE")
 }
 
@@ -138,4 +149,22 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
+    }
+    plugins {
+        id("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
+        }
+    }
+    generateProtoTasks {
+        ofSourceSet("main").forEach {
+            it.plugins {
+                id("grpc") { }
+            }
+        }
+    }
 }

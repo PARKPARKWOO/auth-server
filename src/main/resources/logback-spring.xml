@@ -31,8 +31,10 @@
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>
-    <root level="INFO">
-        <appender-ref ref="LOKI"/>
-        <appender-ref ref="CONSOLE"/>
-    </root>
+    <springProfile name="dev, prod, stg">
+        <root level="INFO">
+            <appender-ref ref="LOKI"/>
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
 </configuration>

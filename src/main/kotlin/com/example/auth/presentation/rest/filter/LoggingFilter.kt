@@ -21,7 +21,6 @@ class LoggingFilter : AbstractReactiveMDCInitializationFilter() {
         exchange: ServerWebExchange,
     ): Context {
         val request = exchange.request
-        println(request.path)
         val userAgent = request.headers.getFirst("User-Agent") ?: ""
         val isMobile = isMobileDevice(userAgent)
         return super
