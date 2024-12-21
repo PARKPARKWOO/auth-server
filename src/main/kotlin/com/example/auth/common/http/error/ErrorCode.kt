@@ -4,6 +4,7 @@ import org.springframework.boot.logging.LogLevel
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatusCode
+import org.woo.grpc.ErrorConverter
 import org.woo.http.FailedApiResponseBody
 
 enum class ErrorCode(
@@ -38,3 +39,5 @@ fun ErrorCode.toFailedResponseBody(): FailedApiResponseBody =
         code = this.name,
         message = this.message,
     )
+
+fun ErrorCode.toGrpcError() = ErrorConverter.toGrpcErrorResponse(message = this.message, status = this.httpCode.value())
