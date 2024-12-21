@@ -1,6 +1,8 @@
 spring:
+  profiles:
+    active: dev
   application:
-    name: auth
+    name: ${spring.profiles.active}-auth
   main:
     web-application-type: reactive
   data:
@@ -55,3 +57,7 @@ jwt:
 grpc:
   server:
     port: 9090
+
+server:
+  http2:
+    enabled: true

@@ -30,7 +30,7 @@ repositories {
 }
 
 val protobufVersion = "3.23.4"
-val grpcVersion = "1.58.0"
+val grpcVersion = "1.63.0"
 extra["springCloudVersion"] = "2023.0.0"
 
 dependencies {
@@ -114,23 +114,14 @@ dependencies {
     }
 
     // grpc
-    implementation("org.woo:grpc:0.0.4-SNAPSHOT")
+    implementation("org.woo:grpc:0.0.6-SNAPSHOT")
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     // https://mvnrepository.com/artifact/net.devh/grpc-spring-boot-starter
 //    implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")
-    implementation("net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE") {
+    implementation("net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE") {
         exclude(group = "io.grpc", module = "grpc-netty-shaded")
         exclude(group = "io.grpc", module = "grpc-protobuf")
-        exclude(group = "io.grpc", module = "grpc-")
-    }
-    implementation("io.grpc:grpc-protobuf:$grpcVersion")
-    implementation("io.grpc:grpc-stub:$grpcVersion")
-    if (JavaVersion.current().isJava9Compatible()) {
-        // Workaround for @javax.annotation.Generated
-        // see: https://github.com/grpc/grpc-java/issues/3633
-        implementation("javax.annotation:javax.annotation-api:1.3.1")
-    } else {
-        compileOnly("jakarta.annotation:jakarta.annotation-api:$protobufVersion") // Java 9+ compatibility - Do NOT update to 2.0.0
+//        exclude(group = "io.grpc", module = "grpc-")
     }
 //    implementation("net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE")
 }
