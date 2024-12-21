@@ -17,6 +17,7 @@ import org.woo.auth.grpc.AuthProto
 import org.woo.auth.grpc.UserInfoServiceGrpc
 import org.woo.grpc.AuthMetadata.JWT_TOKEN_CONTEXT_KEY
 import org.woo.grpc.ErrorConverter
+import org.woo.log.log
 
 @GrpcService
 class UserInfoController(
@@ -45,6 +46,7 @@ class UserInfoController(
             responseObserver?.onNext(response)
             responseObserver?.onCompleted()
         }.onFailure {
+            log().error(it.stackTraceToString())
             when (it) {
                 is AuthException -> {
                     val error = it.errorCode.toGrpcError()
