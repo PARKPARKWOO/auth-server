@@ -13,6 +13,7 @@ import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.woo.log.log
 import java.util.Date
 import java.util.UUID
 import com.example.auth.business.exception.ExpiredJwtException as CustomExpiredJwtException
@@ -82,6 +83,7 @@ class JwtTokenService(
         } catch (e: ExpiredJwtException) {
             throw CustomExpiredJwtException(ErrorCode.EXPIRED_JWT, e)
         } catch (e: JwtException) {
+            log().error("accessToken parse error from $token")
             throw ParseJwtFailedException(ErrorCode.PARSE_JWT_FAILED, e)
         }
 
@@ -102,8 +104,8 @@ class JwtTokenService(
     suspend fun getUserIdFromRefreshToken(refreshToken: String): UUID =
         UUID.fromString(parseRefreshToken(refreshToken)[AuthConstants.USER_ID].toString())
 
-    fun getUserIdFromAccessTokenToken(refreshToken: String): UUID =
-        UUID.fromString(parseAccessToken(refreshToken)[AuthConstants.USER_ID].toString())
+    fun getUserIdFromAccessTokenToken(accessToken: String): UUID =
+        UUID.fromString(parseAccessToken(accessToken)[AuthConstants.USER_ID].toString())
 
     companion object {
         fun minKeyStringLength(algorithm: SignatureAlgorithm) = algorithm.minKeyLength.let { (it + 5) / 6 }
