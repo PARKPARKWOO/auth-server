@@ -39,6 +39,7 @@ class UserInfoController(
                 .newBuilder()
                 .setId(user.id)
                 .setEmail(user.email)
+                .setName(user.name)
                 .setRole(user.role)
                 .build()
         }.onSuccess { response ->
