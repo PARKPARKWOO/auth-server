@@ -35,7 +35,7 @@ extra["springCloudVersion"] = "2023.0.0"
 
 dependencies {
 //    implementation("org.woo:domain-auth:+")
-    implementation("org.woo:domain-auth:0.0.6-SNAPSHOT")
+    implementation("org.woo:domain-auth:0.0.8-SNAPSHOT")
     implementation("org.woo:http:+")
     implementation("org.woo:mapper:+")
     implementation("org.woo:log:0.0.2-SNAPSHOT")

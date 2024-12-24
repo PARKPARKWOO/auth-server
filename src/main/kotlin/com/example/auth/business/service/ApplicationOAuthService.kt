@@ -7,9 +7,11 @@ import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.model.application.RedirectType
 import com.example.auth.domain.model.oauth.GoogleUser
 import com.example.auth.domain.model.oauth.KakaoUser
+import com.example.auth.domain.model.oauth.NaverUser
 import com.example.auth.domain.model.oauth.SocialLoginUser
 import com.example.auth.domain.model.oauth.SocialProvider.GOOGLE
 import com.example.auth.domain.model.oauth.SocialProvider.KAKAO
+import com.example.auth.domain.model.oauth.SocialProvider.NAVER
 import com.example.auth.domain.repository.ApplicationOAuthProviderRepository
 import com.example.auth.domain.repository.ApplicationRepository
 import com.example.auth.domain.repository.DynamicReactiveClientRegistrationAdapter
@@ -102,6 +104,7 @@ class ApplicationOAuthService(
         return when (oAuth2Provider.provider) {
             KAKAO -> KakaoUser(oAuth2User, application.redirectUrl, RedirectType.valueOf(application.redirectType))
             GOOGLE -> GoogleUser(oAuth2User, application.redirectUrl, RedirectType.valueOf(application.redirectType))
+            NAVER -> NaverUser(oAuth2User, application.redirectUrl, RedirectType.valueOf(application.redirectType))
         }
     }
 }

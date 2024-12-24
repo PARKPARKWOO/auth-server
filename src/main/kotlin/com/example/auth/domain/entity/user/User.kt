@@ -94,6 +94,7 @@ class User(
             createdAt = createdAt,
             updatedAt = updatedAt,
             deletedAt = deletedAt,
+            name = name,
         )
 
     fun updateEmail(email: String?): String? {

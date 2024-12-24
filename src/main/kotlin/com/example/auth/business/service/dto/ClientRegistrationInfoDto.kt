@@ -27,9 +27,16 @@ data class ClientRegistrationInfoDto(
         const val KAKAO_METADATA_URI = "https://kauth.kakao.com/.well-known/openid-configuration"
         const val KAKAO_ISSUER_URI = "https://kauth.kakao.com"
 
+        // Naver
+        const val NAVER_AUTHORIZATION_URL = "https://nid.naver.com/oauth2.0/authorize"
+        const val NAVER_TOKEN_URI = "https://nid.naver.com/oauth2.0/token"
+        const val NAVER_USER_INFO_URI = "https://openapi.naver.com/v1/nid/me"
+        const val NAVER_JWK_URI = "https://nid.naver.com/.well-known/jwks.json"
+        const val NAVER_ISSUER_URI = "https://nid.naver.com"
+
         private const val BASE_URL = "https://woo-auth.duckdns.org"
 
-        //        private const val BASE_URL = "http://localhost:8080"
+        //                private const val BASE_URL = "http://localhost:8080"
         const val DEFAULT_REDIRECT_URL = "$BASE_URL/{action}/oauth2/code/{registrationId}"
 //        const val DEFAULT_REDIRECT_URL = "http://localhost:8080/oauth/authoirzation/kakao"
     }
@@ -38,6 +45,7 @@ data class ClientRegistrationInfoDto(
         when (this.provider) {
             SocialProvider.GOOGLE -> createGoogleClientRegistration()
             SocialProvider.KAKAO -> createKakaoClientRegistration()
+            SocialProvider.NAVER -> createNaverClientRegistration()
         }
 
     private fun createKakaoClientRegistration(): ClientRegistration =
@@ -64,5 +72,24 @@ data class ClientRegistrationInfoDto(
             .clientId(clientId)
             .clientSecret(clientSecret)
             .clientName(SocialProvider.GOOGLE.clientNamePrefix + applicationName)
+            .build()
+
+    private fun createNaverClientRegistration(): ClientRegistration =
+        ClientRegistration
+            .withRegistrationId(id.toString())
+//            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+            .clientId(clientId)
+            .clientSecret(clientSecret)
+            // 네이버는 지원하지 않는다.
+//            .scope("openid")
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .tokenUri(NAVER_TOKEN_URI)
+            .redirectUri(DEFAULT_REDIRECT_URL)
+            .userInfoUri(NAVER_USER_INFO_URI)
+            .issuerUri(NAVER_ISSUER_URI)
+            .authorizationUri(NAVER_AUTHORIZATION_URL)
+//            .jwkSetUri(NAVER_JWK_URI)
+            .clientName(SocialProvider.NAVER.clientNamePrefix + applicationName)
+            .userNameAttributeName("response")
             .build()
 }
