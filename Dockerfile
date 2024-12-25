@@ -15,7 +15,7 @@ ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} app.jar
 
 # Download and add Pyroscope Java Agent
-ADD https://repo.pyroscope.io/repository/maven-releases/io/pyroscope/javaagent/0.11.0/javaagent-0.11.0.jar /pyroscope.jar
+ADD https://github.com/grafana/pyroscope-java/releases/download/v0.15.2/pyroscope.jar /pyroscope.jar
 
 # Set the entry point
 ENTRYPOINT ["java", "-javaagent:/pyroscope.jar", "-jar", "app.jar"]
