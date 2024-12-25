@@ -1,7 +1,6 @@
 package com.example.auth.presentation.grpc
 
 import com.example.auth.business.exception.NoBearerTokenException
-import com.example.auth.common.constants.AuthConstants
 import com.example.auth.common.http.error.ErrorCode
 import constant.AuthConstant.BEARER_PREFIX
 import io.grpc.Context

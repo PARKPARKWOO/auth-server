@@ -13,11 +13,11 @@ import io.grpc.Status.INVALID_ARGUMENT
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.runBlocking
 import net.devh.boot.grpc.server.service.GrpcService
+import org.woo.apm.log.log
 import org.woo.auth.grpc.AuthProto
 import org.woo.auth.grpc.UserInfoServiceGrpc
 import org.woo.grpc.AuthMetadata.JWT_TOKEN_CONTEXT_KEY
 import org.woo.grpc.ErrorConverter
-import org.woo.log.log
 
 @GrpcService
 class UserInfoController(

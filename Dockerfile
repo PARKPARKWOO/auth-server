@@ -1,9 +1,15 @@
 FROM openjdk:17-oracle
 
+ARG PYROSCOPE_APPLICATION_NAME
+ARG PYROSCOPE_SERVER_ADDRESS
+
+# Pass ARGs as ENV variables
+ENV PYROSCOPE_APPLICATION_NAME=${PYROSCOPE_APPLICATION_NAME}
+ENV PYROSCOPE_SERVER_ADDRESS=${PYROSCOPE_SERVER_ADDRESS}
+
 ARG JAR_FILE=build/libs/*.jar
 
 COPY ${JAR_FILE} app.jar
 
 
-
-ENTRYPOINT ["java", "-jar","app.jar"]
+ENTRYPOINT ["java", "-javaagent:/pyroscope.jar", "-jar", "app.jar"]
