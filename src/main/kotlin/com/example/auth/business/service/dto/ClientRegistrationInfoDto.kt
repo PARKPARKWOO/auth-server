@@ -36,7 +36,7 @@ data class ClientRegistrationInfoDto(
 
         private const val BASE_URL = "https://woo-auth.duckdns.org"
 
-        //                private const val BASE_URL = "http://localhost:8080"
+        //     private const val BASE_URL = "http://localhost:8080"
         const val DEFAULT_REDIRECT_URL = "$BASE_URL/{action}/oauth2/code/{registrationId}"
 //        const val DEFAULT_REDIRECT_URL = "http://localhost:8080/oauth/authoirzation/kakao"
     }

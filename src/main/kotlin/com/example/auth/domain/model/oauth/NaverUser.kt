@@ -29,7 +29,7 @@ data class NaverUser(
             ?: oAuth2User.attributes["nickname"]?.toString()
     }
 
-    override fun getEmail(): String = attributes["email"].toString()
+    override fun getEmail(): String = getProperties()?.get("email").toString()
 
     override fun getClaims(): Map<String, Any> {
         val claims = mutableMapOf<String, Any>()
