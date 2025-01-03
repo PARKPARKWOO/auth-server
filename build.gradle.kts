@@ -37,7 +37,7 @@ dependencies {
     implementation("org.woo:domain-auth:0.0.8-SNAPSHOT")
     implementation("org.woo:http:+")
     implementation("org.woo:mapper:+")
-    implementation("org.woo:apm:0.1.1")
+    implementation("org.woo:apm:0.1.2")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
