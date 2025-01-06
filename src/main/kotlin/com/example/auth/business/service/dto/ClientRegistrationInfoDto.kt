@@ -34,9 +34,9 @@ data class ClientRegistrationInfoDto(
         const val NAVER_JWK_URI = "https://nid.naver.com/.well-known/jwks.json"
         const val NAVER_ISSUER_URI = "https://nid.naver.com"
 
-        private const val BASE_URL = "https://woo-auth.duckdns.org"
+//        private const val BASE_URL = "https://woo-auth.duckdns.org"
 
-        //     private const val BASE_URL = "http://localhost:8080"
+        private const val BASE_URL = "http://localhost:8080"
         const val DEFAULT_REDIRECT_URL = "$BASE_URL/{action}/oauth2/code/{registrationId}"
 //        const val DEFAULT_REDIRECT_URL = "http://localhost:8080/oauth/authoirzation/kakao"
     }
