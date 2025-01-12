@@ -4,6 +4,7 @@ import com.example.auth.domain.model.oauth.SocialProvider
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.core.AuthorizationGrantType
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames
 
 data class ClientRegistrationInfoDto(
@@ -34,6 +35,11 @@ data class ClientRegistrationInfoDto(
         const val NAVER_JWK_URI = "https://nid.naver.com/.well-known/jwks.json"
         const val NAVER_ISSUER_URI = "https://nid.naver.com"
 
+        // BAND
+        const val BAND_AUTHORIZATION_URL = "https://auth.band.us/oauth2/authorize"
+        const val BAND_TOKEN_URI = "https://auth.band.us/oauth2/token"
+        const val BAND_USER_INFO_URI = "https://openapi.band.us/v2/profile"
+
 //        private const val BASE_URL = "https://woo-auth.duckdns.org"
 
         private const val BASE_URL = "http://localhost:8080"
@@ -46,6 +52,7 @@ data class ClientRegistrationInfoDto(
             SocialProvider.GOOGLE -> createGoogleClientRegistration()
             SocialProvider.KAKAO -> createKakaoClientRegistration()
             SocialProvider.NAVER -> createNaverClientRegistration()
+            SocialProvider.BAND -> createBandClientRegistration()
         }
 
     private fun createKakaoClientRegistration(): ClientRegistration =
@@ -91,5 +98,23 @@ data class ClientRegistrationInfoDto(
 //            .jwkSetUri(NAVER_JWK_URI)
             .clientName(SocialProvider.NAVER.clientNamePrefix + applicationName)
             .userNameAttributeName("response")
+            .build()
+
+    private fun createBandClientRegistration(): ClientRegistration =
+        ClientRegistration
+            .withRegistrationId(id.toString())
+//            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+            .clientId(clientId)
+            .clientSecret(clientSecret)
+            // 네이버는 지원하지 않는다.
+//            .scope("openid")
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .tokenUri(BAND_TOKEN_URI)
+            .redirectUri(DEFAULT_REDIRECT_URL)
+            .userInfoUri(BAND_USER_INFO_URI)
+            .authorizationUri(BAND_AUTHORIZATION_URL)
+//            .jwkSetUri(NAVER_JWK_URI)
+            .clientName(SocialProvider.BAND.clientNamePrefix + applicationName)
+            .userNameAttributeName("result_data")
             .build()
 }

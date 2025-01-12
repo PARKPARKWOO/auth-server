@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.core.oidc.OidcUserInfo
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.core.user.OAuth2User
 
-data class NaverUser(
+data class BandUser(
     val oAuth2User: OAuth2User,
     override val redirectUrl: String,
     override val redirectType: RedirectType
@@ -18,9 +18,9 @@ data class NaverUser(
 
     private lateinit var role: Role
 
-    private fun getProperties(): LinkedHashMap<*, *>? = oAuth2User.attributes["response"] as? LinkedHashMap<*, *>
+    private fun getProperties(): LinkedHashMap<*, *>? = oAuth2User.attributes["result_data"] as? LinkedHashMap<*, *>
 
-    override fun getId(): String = oAuth2User.name
+    override fun getId(): String = getProperties()!!["user_key"].toString()
 
     override fun getNickname(): String? {
         val oidcUser = oAuth2User as? OidcUser
@@ -38,7 +38,7 @@ data class NaverUser(
         return claims
     }
 
-    override fun getProvider(): SocialProvider = SocialProvider.NAVER
+    override fun getProvider(): SocialProvider = SocialProvider.BAND
 
     override fun setClaims(
         userId: String,
@@ -48,7 +48,7 @@ data class NaverUser(
         this.role = role
     }
 
-    override fun getName(): String = oAuth2User.name
+    override fun getName(): String = getProperties()!!["name"].toString()
 
     override fun getAttributes(): MutableMap<String, Any> = oAuth2User.attributes
 

@@ -73,7 +73,7 @@ class CustomOAuthService(
                         password = "",
                         socialId = user.getId(),
                         provider = user.getProvider(),
-                        name = "",
+                        name = user.name,
                     )
                 val createUserEntity = registrationService.registerUser(registerUserCommand)
                 user.setClaims(createUserEntity.id, Role.from(createUserEntity.role))

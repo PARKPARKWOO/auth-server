@@ -6,4 +6,5 @@ enum class SocialProvider(
     KAKAO("Kakao for "),
     GOOGLE("Google for "),
     NAVER("Naver for "),
+    BAND("Band for "),
 }
