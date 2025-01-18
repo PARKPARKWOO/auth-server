@@ -103,17 +103,13 @@ data class ClientRegistrationInfoDto(
     private fun createBandClientRegistration(): ClientRegistration =
         ClientRegistration
             .withRegistrationId(id.toString())
-//            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .clientId(clientId)
             .clientSecret(clientSecret)
-            // 네이버는 지원하지 않는다.
-//            .scope("openid")
             .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
             .tokenUri(BAND_TOKEN_URI)
             .redirectUri(DEFAULT_REDIRECT_URL)
             .userInfoUri(BAND_USER_INFO_URI)
             .authorizationUri(BAND_AUTHORIZATION_URL)
-//            .jwkSetUri(NAVER_JWK_URI)
             .clientName(SocialProvider.BAND.clientNamePrefix + applicationName)
             .userNameAttributeName("result_data")
             .build()
