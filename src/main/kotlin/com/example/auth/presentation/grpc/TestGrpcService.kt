@@ -2,6 +2,7 @@ package com.example.auth.presentation.grpc
 
 import com.example.auth.business.service.ApplicationOAuthService
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto
+import com.google.protobuf.Empty
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import io.grpc.stub.StreamObserver
@@ -18,8 +19,8 @@ class TestGrpcService(
     private val applicationOAuthService: ApplicationOAuthService,
 ) : GrpcTestServiceImplBase() {
     override fun grpcTest(
-        request: TestProto.GrpcTestRequest?,
-        responseObserver: StreamObserver<TestProto.GrpcTestResponse>?,
+        empty: Empty?,
+        responseObserver: StreamObserver<TestProto.GrpcTestResponse>?
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {

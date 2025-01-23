@@ -122,7 +122,6 @@ dependencies {
         exclude(group = "io.grpc", module = "grpc-protobuf")
 //        exclude(group = "io.grpc", module = "grpc-")
     }
-//    implementation("net.devh:grpc-server-spring-boot-starter:2.15.0.RELEASE")
 }
 
 dependencyManagement {
