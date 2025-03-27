@@ -10,7 +10,7 @@ CREATE TABLE if not exists application_user
 CREATE TABLE if not exists organization
 (
     id         varchar(36) NOT NULL PRIMARY KEY,
-    name       varchar     not null,
+    name       varchar(50)     not null,
     manager_id varchar(36),
     created_at timestamp   NOT NULL
 );
@@ -26,6 +26,6 @@ CREATE TABLE if not exists organization_application
 CREATE TABLE if not exists user_oauth_token
 (
     user_id       varchar(36) NOT NULL PRIMARY KEY,
-    access_token  varchar     not null,
-    refresh_token varchar     null
+    access_token  varchar(255)     not null,
+    refresh_token varchar(255)     null
 );
