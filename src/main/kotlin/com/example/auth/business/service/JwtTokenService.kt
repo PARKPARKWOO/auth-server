@@ -1,8 +1,8 @@
 package com.example.auth.business.service
 
 import com.example.auth.business.exception.ParseJwtFailedException
-import com.example.auth.common.constants.AuthConstants
 import com.example.auth.common.http.error.ErrorCode
+import constant.AuthConstant
 import dto.JwtResponseDto
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Header
@@ -102,10 +102,13 @@ class JwtTokenService(
         }
 
     suspend fun getUserIdFromRefreshToken(refreshToken: String): UUID =
-        UUID.fromString(parseRefreshToken(refreshToken)[AuthConstants.USER_ID].toString())
+        UUID.fromString(parseRefreshToken(refreshToken)[AuthConstant.USER_ID].toString())
 
     fun getUserIdFromAccessTokenToken(accessToken: String): UUID =
-        UUID.fromString(parseAccessToken(accessToken)[AuthConstants.USER_ID].toString())
+        UUID.fromString(parseAccessToken(accessToken)[AuthConstant.USER_ID].toString())
+
+    fun getSignInApplicationIdFromAccessTokenToken(accessToken: String): String =
+        parseAccessToken(accessToken)[AuthConstant.APPLICATION_ID].toString()
 
     companion object {
         fun minKeyStringLength(algorithm: SignatureAlgorithm) = algorithm.minKeyLength.let { (it + 5) / 6 }

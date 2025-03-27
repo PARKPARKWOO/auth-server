@@ -8,10 +8,15 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 interface SocialLoginUser : OAuth2User, OidcUser {
     val redirectUrl: String
     val redirectType: RedirectType
+    val oauthAccessToken: String
+    val oauthExpiresAt: Long
+    val signInApplicationId: String
     fun getId(): String
     fun getNickname(): String?
     override fun getEmail(): String
     override fun getClaims(): Map<String, Any>
     fun getProvider(): SocialProvider
     fun setClaims(userId: String, role: Role)
+    fun retrieveOauthAccessToken(): String
+    fun retrieveOauthExpiresAt(): Long
 }

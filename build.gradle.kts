@@ -34,11 +34,11 @@ val grpcVersion = "1.63.0"
 extra["springCloudVersion"] = "2023.0.0"
 
 dependencies {
-    implementation("org.woo:domain-auth:0.0.8-SNAPSHOT")
+    implementation("org.woo:domain-auth:0.1.3")
     implementation("org.woo:http:+")
     implementation("org.woo:mapper:+")
     implementation("org.woo:apm:0.2.2")
-
+    
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -113,7 +113,7 @@ dependencies {
     }
 
     // grpc
-    implementation("org.woo:grpc:0.1.2")
+    implementation("org.woo:grpc:0.2.1")
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     // https://mvnrepository.com/artifact/net.devh/grpc-spring-boot-starter
 //    implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")

@@ -31,6 +31,7 @@ class UserInfoController(
         runCatching {
             val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
             val userId = jwtTokenService.getUserIdFromAccessTokenToken(token)
+            val applicationId = jwtTokenService.getSignInApplicationIdFromAccessTokenToken(token)
             val user =
                 runBlocking {
                     endUserFinder.findByUserId(userId.toString())
@@ -41,6 +42,7 @@ class UserInfoController(
                 .setEmail(user.email)
                 .setName(user.name)
                 .setRole(user.role)
+                .setApplicationId(applicationId)
                 .build()
         }.onSuccess { response ->
             // Send the response back to the client

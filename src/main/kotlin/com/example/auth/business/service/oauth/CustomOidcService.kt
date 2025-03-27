@@ -12,11 +12,13 @@ import com.example.auth.domain.model.oauth.SocialProvider
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.mono
 import model.Role
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService
+import org.springframework.security.oauth2.core.OAuth2AccessToken
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
@@ -32,6 +34,7 @@ class CustomOidcService(
     override fun loadUser(userRequest: OidcUserRequest?): Mono<OidcUser> {
         val oidcReactiveOAuth2UserService = OidcReactiveOAuth2UserService()
         val loadUser = oidcReactiveOAuth2UserService.loadUser(userRequest)
+
         return loadUser.flatMap { oauth2User ->
             mono {
                 val registrationId =
@@ -40,7 +43,7 @@ class CustomOidcService(
                 launch {
                     application(oauth2User)
                 }
-                val convertUser = async { convertSocialUser(oauth2User, registrationId) }.await()
+                val convertUser = async { convertSocialUser(oauth2User, registrationId, userRequest.accessToken) }.await()
                 registerUserIfNotExist(convertUser)
                 convertUser
             }
@@ -50,9 +53,15 @@ class CustomOidcService(
     suspend fun convertSocialUser(
         user: OidcUser,
         registrationId: String,
+        accessToken: OAuth2AccessToken
     ): SocialLoginUser =
         coroutineScope {
-            applicationOAuthService.convertSocialUser(user, registrationId)
+            applicationOAuthService.convertSocialUser(
+                user,
+                registrationId,
+                accessToken.tokenValue,
+                accessToken.expiresAt?.epochSecond ?: 0L
+            )
         }
 
     suspend fun application(user: OAuth2User) =

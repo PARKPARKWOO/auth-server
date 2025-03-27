@@ -11,12 +11,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.withContext
 import model.Role
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService
+import org.springframework.security.oauth2.core.OAuth2AccessToken
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -30,7 +32,6 @@ class CustomOAuthService(
     override fun loadUser(userRequest: OAuth2UserRequest?): Mono<OAuth2User> {
         val defaultReactiveOAuth2UserService = DefaultReactiveOAuth2UserService()
         val loadUser = defaultReactiveOAuth2UserService.loadUser(userRequest)
-
         return loadUser.flatMap { oauth2User ->
             mono {
                 val registrationId =
@@ -38,8 +39,8 @@ class CustomOAuthService(
                         ?: throw NotFoundRegistrationException(ErrorCode.NOT_FOUND_REGISTRATION, null)
                 withContext(Dispatchers.IO) {
                     launch { application(oauth2User) }
-                    val convertUserJob = async { conventSocialUser(oauth2User, registrationId) }
-                    val convertUser = convertUserJob.await()
+                    val convertUser =
+                        async { conventSocialUser(oauth2User, registrationId, userRequest.accessToken) }.await()
                     launch { registerUserIfNotExist(convertUser) }
                     convertUser
                 }
@@ -50,9 +51,15 @@ class CustomOAuthService(
     suspend fun conventSocialUser(
         user: OAuth2User,
         registrationId: String,
+        oauthAccessToken: OAuth2AccessToken,
     ): SocialLoginUser =
         coroutineScope {
-            applicationOAuthService.convertSocialUser(user, registrationId)
+            applicationOAuthService.convertSocialUser(
+                user,
+                registrationId,
+                oauthAccessToken.tokenValue,
+                oauthAccessToken.expiresAt?.epochSecond ?: 0L
+            )
         }
 
     suspend fun application(user: OAuth2User) =

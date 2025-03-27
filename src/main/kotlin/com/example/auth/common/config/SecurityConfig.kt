@@ -2,7 +2,6 @@ package com.example.auth.common.config
 
 import com.example.auth.business.service.JwtTokenService
 import com.example.auth.business.service.oauth.OAuthAuthenticationSuccessHandler
-import com.example.auth.common.constants.AuthConstants
 import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepository
 import com.example.auth.presentation.rest.filter.LoggingFilter
 import com.nimbusds.jose.jwk.JWKSet
@@ -10,6 +9,7 @@ import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
+import constant.AuthConstant
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Qualifier
@@ -156,7 +156,7 @@ class SecurityConfig(
         val adapter =
             ReactiveJwtAuthenticationConverterAdapter { jwt ->
                 val authorities: List<String> =
-                    jwt.claims[AuthConstants.USER_ROLE]?.let {
+                    jwt.claims[AuthConstant.USER_ROLE]?.let {
                         it as List<String>
                     } ?: emptyList()
 

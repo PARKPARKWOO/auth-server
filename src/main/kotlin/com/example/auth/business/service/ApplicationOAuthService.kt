@@ -98,16 +98,49 @@ class ApplicationOAuthService(
     suspend fun convertSocialUser(
         oAuth2User: OAuth2User,
         registrationId: String,
+        accessToken: String,
+        expiresAt: Long,
     ): SocialLoginUser {
         val oAuth2Provider =
             applicationOAuthProviderRepository.findById(registrationId.toLong()).awaitSingle()
         val application = applicationFinder.findById(oAuth2Provider.applicationId)
             ?: throw BusinessException(ErrorCode.NOT_FOUNT_APPLICATION, null)
         return when (oAuth2Provider.provider) {
-            KAKAO -> KakaoUser(oAuth2User, application.redirectUrl, RedirectType.valueOf(application.redirectType))
-            GOOGLE -> GoogleUser(oAuth2User, application.redirectUrl, RedirectType.valueOf(application.redirectType))
-            NAVER -> NaverUser(oAuth2User, application.redirectUrl, RedirectType.valueOf(application.redirectType))
-            BAND -> BandUser(oAuth2User, application.redirectUrl, RedirectType.valueOf(application.redirectType))
+            KAKAO -> KakaoUser(
+                oAuth2User,
+                application.redirectUrl,
+                RedirectType.valueOf(application.redirectType),
+                accessToken,
+                expiresAt,
+                application.id
+            )
+
+            GOOGLE -> GoogleUser(
+                oAuth2User,
+                application.redirectUrl,
+                RedirectType.valueOf(application.redirectType),
+                accessToken,
+                expiresAt,
+                application.id
+            )
+
+            NAVER -> NaverUser(
+                oAuth2User,
+                application.redirectUrl,
+                RedirectType.valueOf(application.redirectType),
+                accessToken,
+                expiresAt,
+                application.id,
+            )
+
+            BAND -> BandUser(
+                oAuth2User,
+                application.redirectUrl,
+                RedirectType.valueOf(application.redirectType),
+                accessToken,
+                expiresAt,
+                application.id,
+            )
         }
     }
 }
