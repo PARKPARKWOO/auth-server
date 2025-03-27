@@ -1,4 +1,4 @@
-CREATE TABLE application_user
+CREATE TABLE if not exists application_user
 (
     id             bigint      NOT NULL PRIMARY KEY auto_increment,
     user_id        varchar(36) not null,
@@ -7,7 +7,7 @@ CREATE TABLE application_user
     created_at     timestamp   NOT NULL
 );
 
-CREATE TABLE organization
+CREATE TABLE if not exists organization
 (
     id         varchar(36) NOT NULL PRIMARY KEY,
     name       varchar     not null,
@@ -15,7 +15,7 @@ CREATE TABLE organization
     created_at timestamp   NOT NULL
 );
 
-CREATE TABLE organization_application
+CREATE TABLE if not exists organization_application
 (
     id              bigint      NOT NULL PRIMARY KEY auto_increment,
     organization_id varchar(36) not null,
@@ -23,7 +23,7 @@ CREATE TABLE organization_application
     created_at      timestamp   NOT NULL
 );
 
-CREATE TABLE user_oauth_token
+CREATE TABLE if not exists user_oauth_token
 (
     user_id       varchar(36) NOT NULL PRIMARY KEY,
     access_token  varchar     not null,
