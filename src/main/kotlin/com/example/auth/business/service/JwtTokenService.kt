@@ -90,11 +90,12 @@ class JwtTokenService(
 
     suspend fun parseRefreshToken(refreshToken: String): Map<String, Any> =
         try {
+            val removeBearerToken = refreshToken.removeBearer()
             Jwts
                 .parserBuilder()
                 .setSigningKey(refreshTokenSecretKey)
                 .build()
-                .parseClaimsJws(refreshToken)
+                .parseClaimsJws(removeBearerToken)
                 .body
         } catch (e: ExpiredJwtException) {
             throw CustomExpiredJwtException(ErrorCode.EXPIRED_JWT, e)
