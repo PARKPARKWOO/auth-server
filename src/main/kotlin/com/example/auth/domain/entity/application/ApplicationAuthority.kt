@@ -1,0 +1,15 @@
+package com.example.auth.domain.entity.application
+
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+
+@Table("application_authority")
+class ApplicationAuthority(
+    @Column("id")
+    val id: Long = 0L,
+    @Column("application_id")
+    val applicationId: String,
+    @Column("authority")
+    val authority: String
+) {
+}

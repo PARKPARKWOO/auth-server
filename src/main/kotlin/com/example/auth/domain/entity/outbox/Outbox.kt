@@ -34,7 +34,6 @@ class Outbox(
                 payload = payload,
                 eventType = eventType.name,
 //                status = TransactionStatus.PENDING.name,
-
                 recordOperation = recordOperation.name,
                 createdAt = LocalDateTime.now(),
             )

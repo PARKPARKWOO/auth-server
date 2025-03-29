@@ -74,11 +74,12 @@ class JwtTokenService(
 
     fun parseAccessToken(token: String): Map<String, Any> =
         try {
+            val removeBearerToken = token.removeBearer()
             Jwts
                 .parserBuilder()
                 .setSigningKey(accessTokenSecretKey)
                 .build()
-                .parseClaimsJws(token)
+                .parseClaimsJws(removeBearerToken)
                 .body
         } catch (e: ExpiredJwtException) {
             throw CustomExpiredJwtException(ErrorCode.EXPIRED_JWT, e)
@@ -112,5 +113,10 @@ class JwtTokenService(
 
     companion object {
         fun minKeyStringLength(algorithm: SignatureAlgorithm) = algorithm.minKeyLength.let { (it + 5) / 6 }
+    }
+
+    private fun String.removeBearer(): String {
+        if (this.startsWith(AuthConstant.BEARER_PREFIX)) return this.removePrefix(AuthConstant.BEARER_PREFIX)
+        return this
     }
 }
