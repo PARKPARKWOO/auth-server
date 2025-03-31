@@ -31,6 +31,7 @@ class R2dbcConfig(
         const val CONNECTION_POOL_INITIAL_SIZE = 25
         const val CONNECTION_POOL_MIN_DILE = 25
         const val CONNECTION_POOL_MAX_SIZE = 50
+        const val DATABASE_SCHEMA = "auth"
     }
     @Bean
     fun transactionManager(connectionFactory: ConnectionFactory): ReactiveTransactionManager {
@@ -61,6 +62,7 @@ class R2dbcConfig(
 
     private fun mysqlConfig() = MySqlConnectionConfiguration.builder()
         .host(host)
+        .database(DATABASE_SCHEMA)
         .user(username)
         .password(password)
         .connectTimeout(java.time.Duration.ofSeconds(MYSQL_CONNECTION_TIME_OUT_SECONDS))
