@@ -53,13 +53,11 @@ class OAuthAuthenticationSuccessHandler(
     ) {
 //        val isJson = ReactorContextHolder.isMobileDevice() || redirectType == RedirectType.JSON
         redirectUrl?.let {
-//            if (isJson) {
-//                this.sendJwtResponseAsJson(jwtResponse)
-//            } else {
-//                this.sendJwtResponseAsCookie(jwtResponse)
-            this.setRedirectConfigurationWithQueryParams(redirectUrl, jwtResponse)
-//            this.setRedirectConfiguration(redirectUrl)
-//            }
+            when (redirectType) {
+                RedirectType.REDIRECT_WITH_COOKIE -> this.sendJwtResponseAsCookie(jwtResponse)
+                RedirectType.JSON -> this.sendJwtResponseAsJson(jwtResponse)
+                RedirectType.QUERY_PARAM -> this.setRedirectConfigurationWithQueryParams(redirectUrl, jwtResponse)
+            }
         } ?: this.sendJwtResponseAsJson(jwtResponse)
     }
 

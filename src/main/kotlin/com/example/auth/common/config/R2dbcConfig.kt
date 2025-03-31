@@ -1,17 +1,37 @@
 package com.example.auth.common.config
 
+import io.asyncer.r2dbc.mysql.MySqlConnectionConfiguration
+import io.asyncer.r2dbc.mysql.MySqlConnectionFactory
+import io.r2dbc.pool.ConnectionPool
+import io.r2dbc.pool.ConnectionPoolConfiguration
 import io.r2dbc.spi.ConnectionFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing
 import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
 import org.springframework.r2dbc.connection.R2dbcTransactionManager
 import org.springframework.transaction.ReactiveTransactionManager
 import org.springframework.transaction.reactive.TransactionalOperator
+import kotlin.time.Duration
 
 @Configuration
 @EnableR2dbcAuditing
-class R2dbcConfig {
+class R2dbcConfig(
+    @Value("\${mysql.host}")
+    private val host: String,
+    @Value("\${spring.r2dbc.username}")
+    private val username: String,
+    @Value("\${spring.r2dbc.password}")
+    private val password: String,
+): AbstractR2dbcConfiguration() {
+    companion object {
+        const val MYSQL_CONNECTION_TIME_OUT_SECONDS = 600L
+        const val CONNECTION_POOL_INITIAL_SIZE = 25
+        const val CONNECTION_POOL_MIN_DILE = 25
+        const val CONNECTION_POOL_MAX_SIZE = 50
+    }
     @Bean
     fun transactionManager(connectionFactory: ConnectionFactory): ReactiveTransactionManager {
         return R2dbcTransactionManager(connectionFactory)
@@ -21,4 +41,28 @@ class R2dbcConfig {
     fun transactionalOperator(transactionManager: ReactiveTransactionManager): TransactionalOperator {
         return TransactionalOperator.create(transactionManager)
     }
+
+    @Bean
+    override fun connectionFactory(): ConnectionFactory {
+        val mySqlConnectionFactory = MySqlConnectionFactory.from(mysqlConfig())
+        val connectionPoolConfiguration = connectionPoolConfig(mySqlConnectionFactory)
+        val connectionPool = ConnectionPool(connectionPoolConfiguration)
+        connectionPool.warmup().block()
+        return connectionPool
+    }
+
+    private fun connectionPoolConfig(mysqlConfig: MySqlConnectionFactory): ConnectionPoolConfiguration
+    = ConnectionPoolConfiguration.builder()
+        .connectionFactory(mysqlConfig)
+        .initialSize(CONNECTION_POOL_MIN_DILE)
+        .minIdle(CONNECTION_POOL_MIN_DILE)
+        .maxSize(CONNECTION_POOL_MAX_SIZE)
+        .build()
+
+    private fun mysqlConfig() = MySqlConnectionConfiguration.builder()
+        .host(host)
+        .user(username)
+        .password(password)
+        .connectTimeout(java.time.Duration.ofSeconds(MYSQL_CONNECTION_TIME_OUT_SECONDS))
+        .build()
 }
