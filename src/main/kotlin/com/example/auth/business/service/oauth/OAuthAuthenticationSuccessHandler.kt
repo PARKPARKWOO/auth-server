@@ -54,7 +54,7 @@ class OAuthAuthenticationSuccessHandler(
 //        val isJson = ReactorContextHolder.isMobileDevice() || redirectType == RedirectType.JSON
         redirectUrl?.let {
             when (redirectType) {
-                RedirectType.REDIRECT_WITH_COOKIE -> this.sendJwtResponseAsCookie(jwtResponse)
+                RedirectType.REDIRECT_WITH_COOKIE -> this.sendJwtResponseAsCookie(jwtResponse, redirectUrl)
                 RedirectType.JSON -> this.sendJwtResponseAsJson(jwtResponse)
                 RedirectType.QUERY_PARAM -> this.setRedirectConfigurationWithQueryParams(redirectUrl, jwtResponse)
             }
@@ -75,11 +75,14 @@ class OAuthAuthenticationSuccessHandler(
         this.statusCode = HttpStatus.FOUND
     }
 
-    private suspend fun ServerHttpResponse.sendJwtResponseAsCookie(jwtResponse: JwtResponseDto) {
+    private suspend fun ServerHttpResponse.sendJwtResponseAsCookie(jwtResponse: JwtResponseDto, redirectUrl: String) {
         this.apply {
             addCookie(createCookie("accessToken", jwtResponse.accessToken, jwtResponse.accessTokenExpiresIn))
             addCookie(createCookie("refreshToken", jwtResponse.refreshToken, jwtResponse.refreshTokenExpiresIn))
         }
+        val uri = URI.create(redirectUrl)
+        this.headers.location = uri
+        this.statusCode = HttpStatus.FOUND
     }
 
     private fun createCookie(
@@ -90,10 +93,10 @@ class OAuthAuthenticationSuccessHandler(
         ResponseCookie
             .from(name, value)
             .httpOnly(true)
-//            .secure(true)
+            .secure(true)
             .path("/")
             .maxAge(Duration.ofMillis(maxAge))
-            .sameSite("Strict")
+            .sameSite("None")
             .build()
 
     private suspend fun ServerHttpResponse.setRedirectConfiguration(redirectUrl: String) {
