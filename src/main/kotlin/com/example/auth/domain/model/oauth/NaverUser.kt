@@ -14,7 +14,7 @@ data class NaverUser(
 ) : AbstractSocialUser(oAuth2User) {
     private fun getProperties(): LinkedHashMap<*, *>? = oAuth2User.attributes["response"] as? LinkedHashMap<*, *>
 
-    override fun getId(): String = oAuth2User.name
+    override fun getId(): String = getProperties()?.get("id").toString() ?: oAuth2User.name
 
     override fun getNickname(): String? {
         val oidcUser = oAuth2User as? OidcUser
@@ -27,5 +27,5 @@ data class NaverUser(
 
     override fun getProvider(): SocialProvider = SocialProvider.NAVER
 
-    override fun getName(): String = oAuth2User.name
+    override fun getName(): String = getProperties()?.get("name").toString()
 }
