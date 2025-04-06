@@ -10,11 +10,9 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing
-import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories
 import org.springframework.r2dbc.connection.R2dbcTransactionManager
 import org.springframework.transaction.ReactiveTransactionManager
 import org.springframework.transaction.reactive.TransactionalOperator
-import kotlin.time.Duration
 
 @Configuration
 @EnableR2dbcAuditing
@@ -29,8 +27,9 @@ class R2dbcConfig(
     companion object {
         const val MYSQL_CONNECTION_TIME_OUT_SECONDS = 600L
         const val CONNECTION_POOL_INITIAL_SIZE = 25
-        const val CONNECTION_POOL_MIN_DILE = 25
+        const val CONNECTION_POOL_MIN_IDLE = 25
         const val CONNECTION_POOL_MAX_SIZE = 50
+        const val CONNECTION_POOL_MAX_IDLE_MIN = 5L
         const val DATABASE_SCHEMA = "auth"
     }
     @Bean
@@ -55,9 +54,10 @@ class R2dbcConfig(
     private fun connectionPoolConfig(mysqlConfig: MySqlConnectionFactory): ConnectionPoolConfiguration
     = ConnectionPoolConfiguration.builder()
         .connectionFactory(mysqlConfig)
-        .initialSize(CONNECTION_POOL_MIN_DILE)
-        .minIdle(CONNECTION_POOL_MIN_DILE)
+        .initialSize(CONNECTION_POOL_MIN_IDLE)
+        .minIdle(CONNECTION_POOL_MIN_IDLE)
         .maxSize(CONNECTION_POOL_MAX_SIZE)
+        .maxIdleTime(java.time.Duration.ofMinutes(CONNECTION_POOL_MAX_IDLE_MIN))
         .build()
 
     private fun mysqlConfig() = MySqlConnectionConfiguration.builder()
