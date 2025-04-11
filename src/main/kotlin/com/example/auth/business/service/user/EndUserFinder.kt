@@ -1,4 +1,4 @@
-package com.example.auth.business.service
+package com.example.auth.business.service.user
 
 import com.example.auth.domain.entity.user.User
 import com.example.auth.domain.model.oauth.SocialProvider
@@ -20,5 +20,5 @@ class EndUserFinder(
         email: String,
     ) = userRepository.findByEmailAndProvider(provider = provider.name, email = email)
 
-    suspend fun findByUserId(id: String): User? = userRepository.findById(id).awaitSingleOrNull()
+    suspend fun findById(id: String): User? = userRepository.findById(id).awaitSingleOrNull()
 }

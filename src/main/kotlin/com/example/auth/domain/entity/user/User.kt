@@ -8,6 +8,7 @@ import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.PRO
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.ROLE_COLUMN
 import com.example.auth.domain.repository.CustomUserRepositoryImpl.Companion.SOCIAL_ID_COLUMN
 import com.fasterxml.uuid.Generators
+import dto.UserContext
 import io.r2dbc.spi.Readable
 import model.Role
 import org.springframework.data.annotation.CreatedDate
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Persistable
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
+import java.util.*
 
 @Table("user")
 class User(
@@ -82,20 +84,6 @@ class User(
                 name = row.get(NAME_COLUMN).toString(),
             )
     }
-
-    fun toModel(): model.User =
-        model.User(
-            id = id,
-            email = email,
-            password = password,
-            provider = provider,
-            role = Role.from(role),
-            socialId = socialId,
-            createdAt = createdAt,
-            updatedAt = updatedAt,
-            deletedAt = deletedAt,
-            name = name,
-        )
 
     fun updateEmail(email: String?): String? {
         if (this.email != email) return email

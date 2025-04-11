@@ -1,6 +1,6 @@
 package com.example.auth.presentation.grpc
 
-import com.example.auth.business.service.ApplicationOAuthService
+import com.example.auth.business.service.application.ApplicationOAuthService
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto
 import com.google.protobuf.Empty
 import io.grpc.Status

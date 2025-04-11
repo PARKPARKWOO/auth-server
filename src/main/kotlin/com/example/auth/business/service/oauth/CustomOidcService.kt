@@ -2,9 +2,10 @@ package com.example.auth.business.service.oauth
 
 import com.example.auth.business.command.RegisterUserCommand
 import com.example.auth.business.exception.NotFoundRegistrationException
-import com.example.auth.business.service.ApplicationOAuthService
-import com.example.auth.business.service.EndUserFinder
-import com.example.auth.business.service.EndUserWriter
+import com.example.auth.business.facade.OAuthApplicationFacade
+import com.example.auth.business.service.application.ApplicationOAuthService
+import com.example.auth.business.service.user.EndUserFinder
+import com.example.auth.business.service.user.EndUserWriter
 import com.example.auth.business.service.RegistrationService
 import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.model.oauth.SocialLoginUser
@@ -12,7 +13,6 @@ import com.example.auth.domain.model.oauth.SocialProvider
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.mono
 import model.Role
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService
@@ -26,10 +26,7 @@ import reactor.core.publisher.Mono
 
 @Service
 class CustomOidcService(
-    private val applicationOAuthService: ApplicationOAuthService,
-    private val endUserFinder: EndUserFinder,
-    private val registrationService: RegistrationService,
-    private val endUserWriter: EndUserWriter,
+    private val oAuthApplicationFacade: OAuthApplicationFacade,
 ) : ReactiveOAuth2UserService<OidcUserRequest, OidcUser> {
     override fun loadUser(userRequest: OidcUserRequest?): Mono<OidcUser> {
         val oidcReactiveOAuth2UserService = OidcReactiveOAuth2UserService()
@@ -40,70 +37,10 @@ class CustomOidcService(
                 val registrationId =
                     userRequest?.clientRegistration?.registrationId
                         ?: throw NotFoundRegistrationException(ErrorCode.NOT_FOUND_REGISTRATION, null)
-                launch {
-                    application(oauth2User)
-                }
-                val convertUser = async { convertSocialUser(oauth2User, registrationId, userRequest.accessToken) }.await()
-                registerUserIfNotExist(convertUser)
-                convertUser
+                val (endUser, socialUser) = oAuthApplicationFacade.createEndUserIfNotExist(oauth2User, registrationId, userRequest.accessToken)
+                oAuthApplicationFacade.createApplicationUserIfNotExist(registrationId.toLong(), endUser.id)
+                socialUser
             }
         }
-    }
-
-    suspend fun convertSocialUser(
-        user: OidcUser,
-        registrationId: String,
-        accessToken: OAuth2AccessToken
-    ): SocialLoginUser =
-        coroutineScope {
-            applicationOAuthService.convertSocialUser(
-                user,
-                registrationId,
-                accessToken.tokenValue,
-                accessToken.expiresAt?.epochSecond ?: 0L
-            )
-        }
-
-    suspend fun application(user: OAuth2User) =
-        coroutineScope {
-        }
-
-    suspend fun registerUserIfNotExist(user: SocialLoginUser) {
-        val userEntity =
-            when (user.getProvider()) {
-                SocialProvider.KAKAO -> {
-                    endUserFinder.findByEmailAndProvider(
-                        provider = user.getProvider(),
-                        email = user.email,
-                    )
-                }
-
-                else -> {
-                    endUserFinder.findBySocialIdAndProvider(
-                        socialId = user.getId(),
-                        provider = user.getProvider(),
-                    )
-                }
-            }
-
-        if (userEntity == null) {
-            register(user)
-        } else {
-            user.setClaims(userEntity.id, Role.from(userEntity.role))
-            endUserWriter.update(userEntity, user)
-        }
-    }
-
-    suspend fun register(user: SocialLoginUser) {
-        val registerUserCommand =
-            RegisterUserCommand(
-                email = user.getEmail(),
-                password = "",
-                socialId = user.getId(),
-                provider = user.getProvider(),
-                name = user.name,
-            )
-        val createUser = registrationService.registerUser(registerUserCommand)
-        user.setClaims(createUser.id, Role.from(createUser.role))
     }
 }

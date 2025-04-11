@@ -1,6 +1,8 @@
 package com.example.auth.domain.repository
 
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto
+import com.example.auth.domain.repository.application.ApplicationOAuthProviderRepository
+import com.example.auth.domain.repository.application.ApplicationRepository
 import com.example.auth.domain.repository.redis.RedisDriver
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono

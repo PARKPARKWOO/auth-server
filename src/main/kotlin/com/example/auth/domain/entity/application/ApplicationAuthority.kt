@@ -10,6 +10,27 @@ class ApplicationAuthority(
     @Column("application_id")
     val applicationId: String,
     @Column("authority")
-    val authority: String
+    val authority: String,
+    @Column("level")
+    var level: Int,
 ) {
+    companion object {
+        fun create(applicationId: String, authority: String, level: Int): ApplicationAuthority = ApplicationAuthority(
+            applicationId = applicationId,
+            authority = authority,
+            level = level,
+        )
+
+        fun createRoleUser(applicationId: String): ApplicationAuthority = ApplicationAuthority(
+            applicationId = applicationId,
+            authority = "ROLE_USER",
+            level = 0
+        )
+
+        fun createRoleAdmin(applicationId: String): ApplicationAuthority = ApplicationAuthority(
+            applicationId = applicationId,
+            authority = "ROLE_ADMIN",
+            level = Int.MAX_VALUE
+        )
+    }
 }

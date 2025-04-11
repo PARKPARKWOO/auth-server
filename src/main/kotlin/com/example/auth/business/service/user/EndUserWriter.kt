@@ -1,4 +1,4 @@
-package com.example.auth.business.service
+package com.example.auth.business.service.user
 
 import com.example.auth.domain.entity.outbox.Outbox
 import com.example.auth.domain.entity.user.User

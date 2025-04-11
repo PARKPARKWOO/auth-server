@@ -1,6 +1,6 @@
 package com.example.auth.presentation.rest.controller
 
-import com.example.auth.business.service.ApplicationOAuthService
+import com.example.auth.business.service.application.ApplicationOAuthService
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.web.bind.annotation.GetMapping

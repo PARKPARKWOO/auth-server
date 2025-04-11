@@ -1,9 +1,11 @@
-package com.example.auth.business.service
+package com.example.auth.business.service.application
 
 import com.example.auth.business.command.RegisterApplicationOAuthProviderCommand
 import com.example.auth.business.exception.BusinessException
+import com.example.auth.business.service.RegistrationService
 import com.example.auth.business.service.dto.ClientRegistrationInfoDto
 import com.example.auth.common.http.error.ErrorCode
+import com.example.auth.domain.entity.application.ApplicationOAuthProvider
 import com.example.auth.domain.model.application.RedirectType
 import com.example.auth.domain.model.oauth.BandUser
 import com.example.auth.domain.model.oauth.GoogleUser
@@ -14,10 +16,11 @@ import com.example.auth.domain.model.oauth.SocialProvider.BAND
 import com.example.auth.domain.model.oauth.SocialProvider.GOOGLE
 import com.example.auth.domain.model.oauth.SocialProvider.KAKAO
 import com.example.auth.domain.model.oauth.SocialProvider.NAVER
-import com.example.auth.domain.repository.ApplicationOAuthProviderRepository
-import com.example.auth.domain.repository.ApplicationRepository
+import com.example.auth.domain.repository.application.ApplicationOAuthProviderRepository
+import com.example.auth.domain.repository.application.ApplicationRepository
 import com.example.auth.domain.repository.DynamicReactiveClientRegistrationAdapter
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 
@@ -26,7 +29,7 @@ class ApplicationOAuthService(
     private val applicationOAuthProviderRepository: ApplicationOAuthProviderRepository,
     private val registerService: RegistrationService,
     private val applicationRepository: ApplicationRepository,
-    private val applicationFinder: ApplicationFinder,
+    private val applicationService: ApplicationService,
     private val dynamicReactiveClientRegistrationAdapter: DynamicReactiveClientRegistrationAdapter,
 ) {
 //    @PostConstruct
@@ -95,6 +98,8 @@ class ApplicationOAuthService(
         return clientRegistrationInfoDto.id
     }
 
+    suspend fun findById(id: Long): ApplicationOAuthProvider? = applicationOAuthProviderRepository.findById(id).awaitSingleOrNull()
+
     suspend fun convertSocialUser(
         oAuth2User: OAuth2User,
         registrationId: String,
@@ -103,7 +108,7 @@ class ApplicationOAuthService(
     ): SocialLoginUser {
         val oAuth2Provider =
             applicationOAuthProviderRepository.findById(registrationId.toLong()).awaitSingle()
-        val application = applicationFinder.findById(oAuth2Provider.applicationId)
+        val application = applicationService.findById(oAuth2Provider.applicationId)
             ?: throw BusinessException(ErrorCode.NOT_FOUNT_APPLICATION, null)
         return when (oAuth2Provider.provider) {
             KAKAO -> KakaoUser(

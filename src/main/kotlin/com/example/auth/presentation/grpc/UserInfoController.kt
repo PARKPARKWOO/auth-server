@@ -1,70 +1,66 @@
 package com.example.auth.presentation.grpc
 
-import com.example.auth.business.exception.AuthException
-import com.example.auth.business.exception.BusinessException
 import com.example.auth.business.exception.NotFoundUserException
-import com.example.auth.business.service.EndUserFinder
+import com.example.auth.business.service.user.EndUserFinder
 import com.example.auth.business.service.JwtTokenService
+import com.example.auth.business.service.application.ApplicationService
 import com.example.auth.common.http.error.ErrorCode
-import com.example.auth.common.http.error.toGrpcError
 import com.google.protobuf.Empty
 import io.grpc.Context
-import io.grpc.Status.INVALID_ARGUMENT
-import io.grpc.stub.StreamObserver
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import net.devh.boot.grpc.server.service.GrpcService
-import org.woo.apm.log.log
 import org.woo.auth.grpc.AuthProto
-import org.woo.auth.grpc.UserInfoServiceGrpc
+import org.woo.auth.grpc.AuthProto.UserInfoResponse
+import org.woo.auth.grpc.UserInfoServiceGrpcKt
 import org.woo.grpc.AuthMetadata.JWT_TOKEN_CONTEXT_KEY
-import org.woo.grpc.ErrorConverter
 
 @GrpcService
 class UserInfoController(
     private val endUserFinder: EndUserFinder,
     private val jwtTokenService: JwtTokenService,
-) : UserInfoServiceGrpc.UserInfoServiceImplBase() {
-    override fun getUserInfoByBearer(
-        empty: Empty?,
-        responseObserver: StreamObserver<AuthProto.UserInfoResponse>?,
-    ) {
-        runCatching {
-            val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
-            val userId = jwtTokenService.getUserIdFromAccessTokenToken(token)
-            val applicationId = jwtTokenService.getSignInApplicationIdFromAccessTokenToken(token)
-            val user =
-                runBlocking {
-                    endUserFinder.findByUserId(userId.toString())
-                } ?: throw NotFoundUserException(ErrorCode.NOT_FOUND_USER, null)
-            AuthProto.UserInfoResponse
-                .newBuilder()
-                .setId(user.id)
-                .setEmail(user.email)
-                .setName(user.name)
-                .setRole(user.role)
-                .setApplicationId(applicationId)
-                .build()
-        }.onSuccess { response ->
-            // Send the response back to the client
-            responseObserver?.onNext(response)
-            responseObserver?.onCompleted()
-        }.onFailure {
-            log().error(it.stackTraceToString())
-            when (it) {
-                is AuthException -> {
-                    val error = it.errorCode.toGrpcError()
-                    val metadata = ErrorConverter.attachErrorToMetadata(error = error, data = null)
-                    responseObserver
-                        ?.onError(INVALID_ARGUMENT.asRuntimeException(metadata))
-                }
-                is BusinessException -> {
-                    val error = it.errorCode.toGrpcError()
-                    val metadata = ErrorConverter.attachErrorToMetadata(error = error, data = null)
-                    responseObserver
-                        ?.onError(INVALID_ARGUMENT.asRuntimeException(metadata))
-                }
-                else -> {}
-            }
+    private val applicationService: ApplicationService,
+) : UserInfoServiceGrpcKt.UserInfoServiceCoroutineImplBase() {
+    override suspend fun getUserInfoByBearer(request: Empty): AuthProto.UserInfoResponse = coroutineScope {
+//        return runCatching {
+        val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
+        val userId = jwtTokenService.getUserIdFromAccessTokenToken(token)
+        val applicationId = jwtTokenService.getSignInApplicationIdFromAccessTokenToken(token)
+        val user = async {
+            endUserFinder.findById(userId.toString())
+                ?: throw NotFoundUserException(ErrorCode.NOT_FOUND_USER, null)
         }
+        val authority =
+            async {
+                val applicationUser = applicationService.getApplicationUser(applicationId, userId.toString())
+                    ?: throw NotFoundUserException(ErrorCode.NOT_FOUND_USER, null)
+                applicationService.getApplicationAuthority(applicationUser.authorityId).authority
+            }
+//        }.onSuccess { user ->
+        UserInfoResponse
+            .newBuilder()
+            .setId(user.await().id)
+            .setEmail(user.await().email)
+            .setName(user.await().name)
+            .setRole(user.await().role)
+            .setApplicationRole(authority.await())
+            .setApplicationId(applicationId)
+            .build()
+//        }.onFailure {
+//            log().error(it.stackTraceToString())
+//            when (it) {
+//                is AuthException -> {
+//                    val error = it.errorCode.toGrpcError()
+//                    val metadata = ErrorConverter.attachErrorToMetadata(error = error, data = null)
+//                }
+//                is BusinessException -> {
+//                    val error = it.errorCode.toGrpcError()
+//                    val metadata = ErrorConverter.attachErrorToMetadata(error = error, data = null)
+//                    responseObserver
+//                        ?.onError(INVALID_ARGUMENT.asRuntimeException(metadata))
+//                }
+//                else -> {}
+//            }
+//        }
     }
 }

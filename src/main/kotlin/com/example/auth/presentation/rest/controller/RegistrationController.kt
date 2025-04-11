@@ -1,6 +1,6 @@
 package com.example.auth.presentation.rest.controller
 
-import com.example.auth.business.service.ApplicationOAuthService
+import com.example.auth.business.service.application.ApplicationOAuthService
 import com.example.auth.business.service.RegistrationService
 import com.example.auth.presentation.rest.controller.request.RegistrationApplicationOAuthRequest
 import com.example.auth.presentation.rest.controller.request.RegistrationApplicationRequest
