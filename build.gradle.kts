@@ -113,7 +113,7 @@ dependencies {
     }
 
     // grpc
-    implementation("org.woo:grpc:0.2.2")
+    implementation("org.woo:grpc:0.2.3")
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     // https://mvnrepository.com/artifact/net.devh/grpc-spring-boot-starter
 //    implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")
@@ -122,6 +122,7 @@ dependencies {
         exclude(group = "io.grpc", module = "grpc-protobuf")
 //        exclude(group = "io.grpc", module = "grpc-")
     }
+    implementation("io.grpc:grpc-kotlin-stub:1.4.1")
 }
 
 dependencyManagement {
@@ -148,11 +149,15 @@ protobuf {
         id("grpc") {
             artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
         }
+        id("grpckt") {
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.2.0:jdk7@jar"
+        }
     }
     generateProtoTasks {
         ofSourceSet("main").forEach {
             it.plugins {
                 id("grpc") { }
+                id("grpckt") {}
             }
         }
     }
