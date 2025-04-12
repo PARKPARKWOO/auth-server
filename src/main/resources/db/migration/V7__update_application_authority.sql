@@ -22,3 +22,11 @@ CREATE TABLE if not exists application_user
 );
 
 CREATE INDEX idx_application_user ON application_user (application_id, user_id);
+
+insert into application_authority(application_id, authority, level)
+select id, "ROLE_USER", 0
+from application;
+
+insert into application_authority(application_id, authority, level)
+select id, "ROLE_ADMIN", 2147483647
+from application;
