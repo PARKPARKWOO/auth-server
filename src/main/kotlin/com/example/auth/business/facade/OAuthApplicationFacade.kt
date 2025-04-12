@@ -34,7 +34,7 @@ class OAuthApplicationFacade(
         val applicationId = applicationOauth.applicationId
         val applicationUser = applicationService.getApplicationUser(applicationId, userId)
         if (applicationUser == null) {
-            val defaultAuthority = applicationService.getApplicationAuthority(applicationId)
+            val defaultAuthority = applicationService.getLowLevelApplicationAuthority(applicationId)
             applicationService.createApplicationUser(applicationId, userId, defaultAuthority.id)
         }
     }

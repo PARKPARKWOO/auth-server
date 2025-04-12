@@ -8,10 +8,11 @@ import com.example.auth.domain.repository.application.ApplicationRepository
 import com.example.auth.domain.repository.application.ApplicationUserRepository
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 
 @Service
 class ApplicationService(
@@ -35,9 +36,14 @@ class ApplicationService(
         applicationAuthorityRepository.findById(id).awaitSingle()
     }
 
-    suspend fun getApplicationAuthority(applicationId: String): ApplicationAuthority = coroutineScope {
+    suspend fun getLowLevelApplicationAuthority(applicationId: String): ApplicationAuthority = coroutineScope {
         applicationAuthorityRepository.findByApplicationIdOrderByLevelAsc(applicationId).awaitFirst()
     }
+
+    suspend fun getApplicationAuthorityList(applicationId: String): List<ApplicationAuthority> =
+        applicationAuthorityRepository.findAllByApplicationId(applicationId)
+            .collectList()
+            .awaitSingle()
 
     suspend fun getApplicationUser(applicationId: String, userId: String): ApplicationUser? = coroutineScope {
         applicationUserRepository.findByApplicationIdAndUserId(applicationId, userId)
@@ -49,4 +55,10 @@ class ApplicationService(
             val user = ApplicationUser.create(userId, applicationId, authorityId)
             applicationUserRepository.save(user).awaitSingle()
         }
+
+    fun getApplicationUserByPage(pageable: Pageable, applicationId: String): Flux<ApplicationUser> =
+        applicationUserRepository.findAllByApplicationId(pageable, applicationId)
+
+    suspend fun getTotalApplicationUserCount(applicationId: String): Long =
+        applicationUserRepository.countByApplicationId(applicationId).awaitSingle()
 }

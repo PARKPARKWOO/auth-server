@@ -5,6 +5,7 @@ import com.example.auth.domain.model.oauth.SocialProvider
 import com.example.auth.domain.repository.UserRepository
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 
 @Service
 class EndUserFinder(
@@ -21,4 +22,6 @@ class EndUserFinder(
     ) = userRepository.findByEmailAndProvider(provider = provider.name, email = email)
 
     suspend fun findById(id: String): User? = userRepository.findById(id).awaitSingleOrNull()
+
+    fun findAllByIds(ids: List<String>): Flux<User> = userRepository.findAllById(ids)
 }

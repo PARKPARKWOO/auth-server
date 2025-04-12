@@ -6,4 +6,6 @@ import reactor.core.publisher.Flux
 
 interface ApplicationAuthorityRepository : R2dbcRepository<ApplicationAuthority, Long> {
     fun findByApplicationIdOrderByLevelAsc(applicationId: String): Flux<ApplicationAuthority>
+
+    fun findAllByApplicationId(applicationId: String): Flux<ApplicationAuthority>
 }
