@@ -13,7 +13,7 @@ spring:
       repositories:
         enabled: false
   r2dbc:
-    url: r2dbc:mysql://${mysql.host}:3306/auth
+    url: r2dbc:mysql://${mysql.host}:3306/auth?useUnicode=yes&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: ${RDBMS_USERNAME}
     password: ${RDBMS_PASSWORD}
   flyway:
