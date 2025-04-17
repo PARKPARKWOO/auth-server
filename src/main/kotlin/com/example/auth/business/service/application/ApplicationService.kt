@@ -66,5 +66,6 @@ class ApplicationService(
     suspend fun updateApplicationUserRole(targetUserId: String, authorityId: Long, applicationId: String) {
         val applicationUser = applicationUserRepository.findByApplicationIdAndUserId(applicationId, targetUserId).awaitSingle()
         applicationUser.updateRole(authorityId)
+        applicationUserRepository.save(applicationUser).awaitSingle()
     }
 }
