@@ -16,20 +16,28 @@ class ApplicationUser(
     @Column("application_id")
     val applicationId: String,
     @Column("authority_id")
-    val authorityId: Long,
+    var authorityId: Long,
 ): R2dbcEntity<Long>() {
     companion object {
-        fun create(userId: String, applicationId: String, authorityId: Long): ApplicationUser = ApplicationUser(
-            id = 0L,
-            applicationId = applicationId,
-            userId = userId,
-            authorityId = authorityId,
-        )
+        fun create(userId: String, applicationId: String, authorityId: Long): ApplicationUser{
+            val user = ApplicationUser(
+                id = 0L,
+                applicationId = applicationId,
+                userId = userId,
+                authorityId = authorityId,
+            )
+            user.newEntity = true
+            return user
+        }
     }
     @Column("created_at")
     @CreatedDate
     lateinit var createdAt: LocalDateTime
     override fun getId(): Long {
         return id
+    }
+
+    fun updateRole(authorityId: Long) {
+        this.authorityId = authorityId
     }
 }

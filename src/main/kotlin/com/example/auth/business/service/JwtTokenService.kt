@@ -106,10 +106,10 @@ class JwtTokenService(
     suspend fun getUserIdFromRefreshToken(refreshToken: String): UUID =
         UUID.fromString(parseRefreshToken(refreshToken)[AuthConstant.USER_ID].toString())
 
-    fun getUserIdFromAccessTokenToken(accessToken: String): UUID =
+    fun getUserIdFromAccessToken(accessToken: String): UUID =
         UUID.fromString(parseAccessToken(accessToken)[AuthConstant.USER_ID].toString())
 
-    fun getSignInApplicationIdFromAccessTokenToken(accessToken: String): String =
+    fun getSignInApplicationIdFromAccessToken(accessToken: String): String =
         parseAccessToken(accessToken)[AuthConstant.APPLICATION_ID].toString()
 
     companion object {

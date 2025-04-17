@@ -10,6 +10,7 @@ import net.devh.boot.grpc.server.service.GrpcService
 import org.woo.auth.grpc.AuthorityProto
 import org.woo.auth.grpc.AuthorityServiceGrpcKt
 import org.woo.grpc.AuthMetadata.JWT_TOKEN_CONTEXT_KEY
+import java.util.*
 
 @GrpcService
 class AuthorityController(
@@ -17,10 +18,8 @@ class AuthorityController(
     private val jwtTokenService: JwtTokenService,
 ) : AuthorityServiceGrpcKt.AuthorityServiceCoroutineImplBase() {
     override suspend fun createApplicationAuthority(request: AuthorityProto.CreateApplicationAuthorityRequest): Empty {
-        val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
-        val userId = jwtTokenService.getUserIdFromAccessTokenToken(token)
-        val applicationId = jwtTokenService.getSignInApplicationIdFromAccessTokenToken(token)
-        verifyUser(userId.toString(), applicationId)
+        val (applicationId, userId) = getApplicationAndUserId()
+        verifyAdminUser(userId.toString(), applicationId)
         applicationService.createAuthority(
             applicationId = request.applicationId,
             authority = request.authority,
@@ -29,10 +28,25 @@ class AuthorityController(
         return Empty.getDefaultInstance()
     }
 
-    private suspend fun verifyUser(userId: String, applicationId: String) {
+    override suspend fun updateApplicationUserRole(request: AuthorityProto.UpdateApplicationUserRoleCommand): Empty {
+        val (applicationId, userId) = getApplicationAndUserId()
+        verifyAdminUser(userId.toString(), applicationId)
+        if (request.applicationId != applicationId) throw BusinessException(ErrorCode.FORBIDDEN, null)
+        applicationService.updateApplicationUserRole(request.targetUserId, request.authorityId, applicationId)
+        return Empty.getDefaultInstance()
+    }
+
+    private suspend fun verifyAdminUser(userId: String, applicationId: String) {
         val applicationUser = applicationService.getApplicationUser(applicationId, userId)
             ?: throw BusinessException(ErrorCode.NOT_FOUND_USER, null)
         val userAuthority = applicationService.getApplicationAuthority(applicationUser.authorityId)
         if (userAuthority.level != Int.MAX_VALUE) throw BusinessException(ErrorCode.FORBIDDEN, null)
+    }
+
+    private suspend fun getApplicationAndUserId(): Pair<String, UUID> {
+        val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
+        val userId = jwtTokenService.getUserIdFromAccessToken(token)
+        val applicationId = jwtTokenService.getSignInApplicationIdFromAccessToken(token)
+        return Pair(applicationId, userId)
     }
 }

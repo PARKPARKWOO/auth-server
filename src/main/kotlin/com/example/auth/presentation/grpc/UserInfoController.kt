@@ -9,7 +9,6 @@ import com.example.auth.common.http.error.ErrorCode
 import com.google.protobuf.Empty
 import io.grpc.Context
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactor.awaitSingle
 import net.devh.boot.grpc.server.service.GrpcService
@@ -124,8 +123,8 @@ class UserInfoController(
 
     private suspend fun getApplicationAndUserId(): Pair<String, UUID> {
         val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
-        val userId = jwtTokenService.getUserIdFromAccessTokenToken(token)
-        val applicationId = jwtTokenService.getSignInApplicationIdFromAccessTokenToken(token)
+        val userId = jwtTokenService.getUserIdFromAccessToken(token)
+        val applicationId = jwtTokenService.getSignInApplicationIdFromAccessToken(token)
         return Pair(applicationId, userId)
     }
 

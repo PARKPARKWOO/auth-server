@@ -23,14 +23,28 @@ class Application(
     @Column("created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
 ) : Persistable<String> {
+    companion object {
+        fun create(
+            name: String,
+            redirectUrl: String,
+            redirectType: String,
+        ): Application {
+            val application = Application(
+                id = Generators.timeBasedEpochGenerator().generate().toString(),
+                name = name,
+                redirectUrl = redirectUrl,
+                redirectType = redirectType,
+                createdAt = LocalDateTime.now(),
+            )
+            application.newEntity = true
+            return application
+        }
+    }
+
     @Transient
-    private var newEntity: Boolean = true
+    private var newEntity: Boolean = false
     override fun getId() = id
 
     @Transient
     override fun isNew(): Boolean = newEntity
-
-    fun markNotNew() {
-        newEntity = false
-    }
 }

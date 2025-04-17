@@ -5,11 +5,7 @@ import org.springframework.data.domain.Persistable
 
 abstract class R2dbcEntity<ID>(): Persistable<ID> {
     @Transient
-    private var newEntity: Boolean = true
+    protected var newEntity: Boolean = false
     @Transient
     override fun isNew(): Boolean = newEntity
-
-    fun markNotNew() {
-        newEntity = false
-    }
 }

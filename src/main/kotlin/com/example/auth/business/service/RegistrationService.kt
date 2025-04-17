@@ -43,7 +43,7 @@ class RegistrationService(
         redirectType: RedirectType
     ): String {
         return transactionalOperator.execute {
-            val application = Application(
+            val application = Application.create(
                 name = name,
                 redirectUrl = redirectUrl,
                 redirectType = redirectType.name

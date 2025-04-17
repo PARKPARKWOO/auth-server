@@ -38,9 +38,9 @@ dependencies {
     implementation("org.woo:http:+")
     implementation("org.woo:mapper:+")
     implementation("org.woo:apm:0.2.2")
-    
+
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -52,7 +52,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     // oauth + security
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
@@ -113,7 +113,7 @@ dependencies {
     }
 
     // grpc
-    implementation("org.woo:grpc:0.2.4")
+    implementation("org.woo:grpc:0.2.5")
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     // https://mvnrepository.com/artifact/net.devh/grpc-spring-boot-starter
 //    implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")
@@ -123,6 +123,14 @@ dependencies {
 //        exclude(group = "io.grpc", module = "grpc-")
     }
     implementation("io.grpc:grpc-kotlin-stub:1.4.1")
+
+    // for test
+    testImplementation("io.mockk:mockk:1.13.17")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+        exclude(group = "org.mockito", module = "mockito-core")
+    }
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
 }
 
 dependencyManagement {

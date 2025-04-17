@@ -61,4 +61,9 @@ class ApplicationService(
 
     suspend fun getTotalApplicationUserCount(applicationId: String): Long =
         applicationUserRepository.countByApplicationId(applicationId).awaitSingle()
+
+    suspend fun updateApplicationUserRole(targetUserId: String, authorityId: Long, applicationId: String) {
+        val applicationUser = applicationUserRepository.findByApplicationIdAndUserId(applicationId, targetUserId).awaitSingle()
+        applicationUser.updateRole(authorityId)
+    }
 }
