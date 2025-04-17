@@ -10,6 +10,7 @@ import com.google.protobuf.Empty
 import io.grpc.Context
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import net.devh.boot.grpc.server.service.GrpcService
 import org.springframework.data.domain.PageRequest
@@ -90,7 +91,7 @@ class UserInfoController(
         }
 
         val applicationUsers = applicationUsersDeferred.await()
-        val authorityList = authorityListDeferred.await()
+        val authorityList = authorityListDeferred.await().toList()
         val totalItems = totalItemsDeferred.await()
         val totalPages = if (size > 0) ((totalItems + size - 1) / size) else 1
 

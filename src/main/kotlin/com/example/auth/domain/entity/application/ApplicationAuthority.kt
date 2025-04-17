@@ -35,4 +35,11 @@ class ApplicationAuthority(
             level = Int.MAX_VALUE
         )
     }
+
+    fun toModel(): model.ApplicationAuthority = model.ApplicationAuthority(
+        id = id,
+        applicationId = applicationId,
+        level = level,
+        authority = authority,
+    )
 }

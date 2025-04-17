@@ -7,6 +7,8 @@ import com.example.auth.domain.repository.application.ApplicationAuthorityReposi
 import com.example.auth.domain.repository.application.ApplicationRepository
 import com.example.auth.domain.repository.application.ApplicationUserRepository
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -40,10 +42,9 @@ class ApplicationService(
         applicationAuthorityRepository.findByApplicationIdOrderByLevelAsc(applicationId).awaitFirst()
     }
 
-    suspend fun getApplicationAuthorityList(applicationId: String): List<ApplicationAuthority> =
-        applicationAuthorityRepository.findAllByApplicationId(applicationId)
-            .collectList()
-            .awaitSingle()
+    fun getApplicationAuthorityList(applicationId: String): Flow<ApplicationAuthority> =
+        applicationAuthorityRepository.findAllByApplicationId(applicationId).asFlow()
+
 
     suspend fun getApplicationUser(applicationId: String, userId: String): ApplicationUser? = coroutineScope {
         applicationUserRepository.findByApplicationIdAndUserId(applicationId, userId)
