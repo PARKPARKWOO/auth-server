@@ -28,6 +28,9 @@ spring:
     compatibility-verifier:
       enabled: false
 management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
   endpoints:
     web:
       exposure:
