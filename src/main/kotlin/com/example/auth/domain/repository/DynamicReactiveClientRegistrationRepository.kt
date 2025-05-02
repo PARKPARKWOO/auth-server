@@ -33,7 +33,6 @@ class DynamicReactiveClientRegistrationAdapter(
         const val CLIENT_REGISTRATION_KEY = "client:registration"
     }
 
-    // rdbms 직접 연동하면 나머진 필요없음
     suspend fun initialize(initialRegistrations: List<ClientRegistration>) {
         registrations.putAll(initialRegistrations.associateBy { it.registrationId })
         redisDriver.addListForRight(CLIENT_REGISTRATION_KEY, initialRegistrations)

@@ -1,0 +1,47 @@
+@startuml
+actor User
+participant Application
+database Redis
+participant Manager
+participant Worker
+
+== Application Startup ==
+Application -> Manager : register(appId)\nstores heartbeat
+Manager -> Redis : SET app:{appId} appInfo [opsForValue]
+
+== Health Check ==
+loop every 30s
+    Manager -> Application : pingHealth()
+    alt healthy
+        Application --> Manager : pong
+    else failed ≥ 3
+        Manager -> Redis : DEL app:{appId}
+    end
+end
+
+== User WebSocket Connection ==
+User -> Application : open WebSocket(sessionId)
+Application -> Redis : SET session:{sessionId} wsInfo [opsForValue]
+Application -> Redis : ZADD queue {timestamp, userId} [ZSet]
+Application -> Redis : RPUSH waiting:{userId} sessionId [List]
+
+== Queue Monitoring & Matching ==
+loop poll interval
+    Manager -> Redis : ZRANGE queue 0 -1
+    alt found available worker in Redis
+        Manager -> Redis : SETNX lock:{userId}:{workerId} 1 PX 30000 [Distributed Lock]
+        Manager -> Redis : RPUSH connections:{userId} {workerId} [List]
+        Manager -> Redis : PUBLISH userId "" [Pub/Sub topic=userId]
+    else
+        Manager -> Application : sendQueueRank(...)
+    end
+end
+
+== Worker Side Signaling ==
+Worker -> Redis : SUBSCRIBE userId [Pub/Sub]
+activate Worker
+Redis --> Worker : message(userId)
+Worker -> Redis : LPOP connections:{userId} -> workerId
+Worker -> Application : signalingOffer(userId, workerId)
+deactivate Worker
+@enduml

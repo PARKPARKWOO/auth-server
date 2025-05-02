@@ -10,21 +10,23 @@ import org.springframework.security.oauth2.core.user.OAuth2User
 
 abstract class AbstractSocialUser(
     val oAuthUser: OAuth2User,
-): SocialLoginUser {
-    protected lateinit var userId: String
+) : SocialLoginUser {
+    private lateinit var endUserId: String
 
-    protected lateinit var role: Role
+    private lateinit var role: Role
+
+    fun getEndUserId(): String = endUserId
 
     override fun getClaims(): Map<String, Any> {
         val claims = mutableMapOf<String, Any>()
-        claims[AuthConstant.USER_ID] = userId
+        claims[AuthConstant.USER_ID] = endUserId
         claims[AuthConstant.USER_ROLE] = role
         claims[AuthConstant.APPLICATION_ID] = signInApplicationId
         return claims
     }
 
     override fun setClaims(userId: String, role: Role) {
-        this.userId = userId
+        this.endUserId = userId
         this.role = role
     }
 

@@ -51,6 +51,7 @@ class OAuthApplicationFacade(
             Pair(endUser, socialUser)
         }
 
+    // kakao는 application 마다 id가 달라 Email 로 구분해야 한다. 고유한 유저 식별이 안됨
     private suspend fun registerUserIfNotExist(user: SocialLoginUser): User {
         val userEntity =
             when (user.getProvider()) {
@@ -81,15 +82,8 @@ class OAuthApplicationFacade(
         return endUser
     }
 
-    suspend fun save(user: SocialLoginUser): User {
-        val registerUserCommand =
-            RegisterUserCommand(
-                email = user.getEmail(),
-                password = "",
-                socialId = user.getId(),
-                provider = user.getProvider(),
-                name = user.name,
-            )
+    private suspend fun save(user: SocialLoginUser): User {
+        val registerUserCommand = RegisterUserCommand.from(user)
         return registrationService.registerUser(registerUserCommand)
     }
 }

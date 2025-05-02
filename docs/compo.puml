@@ -1,0 +1,27 @@
+@startuml
+title Redis Pub/Sub WebSocket Management - Component Diagram
+
+actor User
+
+component "WebSocket Application\n(App Service)" as App <<application>>
+component "Worker Application\n(Worker App)"   as Worker <<application>>
+component "Manager Service"                    as Manager <<service>>
+database "Redis Cluster\n(ZSet, List, String, Pub/Sub)" as Redis <<database>>
+node "WebSocket Endpoint"                      as WS <<component>>
+
+User --> WS : open/close\nmessages
+WS --> App : delegate\nWebSocket events
+
+App --> Redis : SET session:{sessionId}\nZADD queue\nRPUSH waiting:{userId}
+App --> Manager : register(appId)\nheartbeat
+
+Manager --> Redis : GET/DEL app:{appId}\nZRANGE queue\nSETNX lock:{userId}:{workerId}\nRPUSH connections:{userId}\nPUBLISH {userId}
+Manager --> App   : pingHealth()
+App     --> Manager : pong
+
+Worker --> Redis : SUBSCRIBE {userId} (Pub/Sub)
+Worker --> Redis : LPOP connections:{userId}
+Manager --> Worker : signaling notification (via Pub/Sub)
+Worker --> App     : signalingOffer(userId, workerId)
+
+@enduml

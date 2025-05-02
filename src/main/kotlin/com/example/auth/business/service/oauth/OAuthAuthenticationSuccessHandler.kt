@@ -2,7 +2,8 @@ package com.example.auth.business.service.oauth
 
 import com.example.auth.business.service.JwtTokenService
 import com.example.auth.domain.model.application.RedirectType
-import com.example.auth.domain.model.oauth.SocialLoginUser
+import com.example.auth.domain.model.oauth.AbstractSocialUser
+import com.example.auth.domain.repository.redis.RedisDriver
 import com.fasterxml.jackson.databind.ObjectMapper
 import dto.JwtResponseDto
 import kotlinx.coroutines.reactor.awaitSingle
@@ -23,6 +24,7 @@ import java.time.Duration
 @Component
 class OAuthAuthenticationSuccessHandler(
     private val jwtTokenService: JwtTokenService,
+    private val redisDriver: RedisDriver,
 ) : ServerAuthenticationSuccessHandler {
     override fun onAuthenticationSuccess(
         webFilterExchange: WebFilterExchange,
@@ -30,11 +32,11 @@ class OAuthAuthenticationSuccessHandler(
     ): Mono<Void> {
         return Mono.defer {
             val socialLoginUser =
-                authentication?.principal as? SocialLoginUser
+                authentication?.principal as? AbstractSocialUser
                     ?: return@defer Mono.error<Void>(IllegalArgumentException("Authentication principal is not valid"))
             mono {
                 val response = webFilterExchange.exchange.response
-                val jwtResponse = generateJwtToken(socialLoginUser.getClaims())
+                val jwtResponse = generateJwtTokenAndSaveToken(socialLoginUser.getClaims())
                 response.sendJwtResponseAsRedirect(
                     jwtResponse = jwtResponse,
                     redirectUrl = socialLoginUser.redirectUrl,
@@ -44,7 +46,8 @@ class OAuthAuthenticationSuccessHandler(
         }
     }
 
-    private suspend fun generateJwtToken(claims: Map<String, Any>): JwtResponseDto = jwtTokenService.build(claims)
+    private suspend fun generateJwtTokenAndSaveToken(claims: Map<String, Any>): JwtResponseDto =
+        jwtTokenService.buildAndSave(claims)
 
     private suspend fun ServerHttpResponse.sendJwtResponseAsRedirect(
         jwtResponse: JwtResponseDto,

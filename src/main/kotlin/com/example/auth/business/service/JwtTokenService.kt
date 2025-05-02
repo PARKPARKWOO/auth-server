@@ -1,7 +1,9 @@
 package com.example.auth.business.service
 
+import com.example.auth.business.exception.MalFormedTokenException
 import com.example.auth.business.exception.ParseJwtFailedException
 import com.example.auth.common.http.error.ErrorCode
+import com.example.auth.domain.repository.redis.RedisDriver
 import constant.AuthConstant
 import dto.JwtResponseDto
 import io.jsonwebtoken.ExpiredJwtException
@@ -28,9 +30,29 @@ class JwtTokenService(
     private val accessTokenExpireTime: Long,
     @Value("\${jwt.refresh-token.expire-millis}")
     private val refreshTokenExpireTime: Long,
+    private val redisDriver: RedisDriver,
 ) {
     private val accessTokenSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessTokenSecretKeyString))
     private val refreshTokenSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshTokenSecretKeyString))
+
+    suspend fun buildAndSave(claims: Map<String, Any>): JwtResponseDto {
+        val jwtResponse = build(claims)
+        redisDriver.setValue(
+            claims.getValue(AuthConstant.USER_ID).toString(),
+            jwtResponse.refreshToken,
+            jwtResponse.refreshTokenExpiresIn
+        )
+        return jwtResponse
+    }
+
+    suspend fun reissueToken(refreshToken: String): String {
+        val claims = parseRefreshToken(refreshToken)
+        val userId = claims[AuthConstant.USER_ID].toString()
+        return redisDriver.getValue(userId, String::class.java)?.let { refreshTokenInRedis ->
+            if (refreshTokenInRedis != refreshToken) throw MalFormedTokenException(ErrorCode.EXPIRED_JWT, null)
+            buildAccessToken(claims)
+        } ?: throw CustomExpiredJwtException(ErrorCode.EXPIRED_JWT, null)
+    }
 
     suspend fun build(claims: Map<String, Any>): JwtResponseDto {
         val accessToken = buildAccessToken(claims)

@@ -48,12 +48,10 @@ class RedisConfig(
 //            .hashKey(serializer).build()
         val rrcf: ReactiveRedisConnectionFactory = redisConnectionFactory
 
-        // String 직렬화기 (key용)
         val stringSerializer = StringRedisSerializer()
         val mapper = ObjectMapper().apply {
             findAndRegisterModules()
         }
-        // JSON 직렬화기 (value용)
         val jacksonSerializer = Jackson2JsonRedisSerializer(mapper, Any::class.java)
 
         val builder = RedisSerializationContext

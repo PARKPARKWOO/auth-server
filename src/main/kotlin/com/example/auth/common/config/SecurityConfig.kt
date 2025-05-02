@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.config.Customizer
+import org.springframework.security.config.Customizer.withDefaults
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
@@ -30,6 +32,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authoriza
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
@@ -71,9 +74,14 @@ class SecurityConfig(
     fun filterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
         http
             .csrf { csrf -> csrf.disable() }
+            .apply {
+                OAuth2AuthorizationServerConfigurer().oidc { oidc ->
+                    oidc.userInfoEndpoint(withDefaults())
+                }
+            }
             .addFilterBefore(loggingFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .authorizeExchange { exchange ->
-                exchange.pathMatchers("/**", "/login").permitAll() // 로그인 페이지와 루트는 허용
+                exchange.pathMatchers("/**", "/login").permitAll()
                 exchange
                     .pathMatchers("/api/v1/auth/**")
                     .permitAll()
@@ -86,7 +94,6 @@ class SecurityConfig(
             }.formLogin(ServerHttpSecurity.FormLoginSpec::disable)
             .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
             .oauth2ResourceServer { oauth2 ->
-//                oauth2.jwt(Customizer.withDefaults())
                 oauth2.jwt { jwt ->
                     jwt.jwtDecoder(reactiveJwtDecoder())
                     jwt.jwtAuthenticationConverter(jwtConverter())
@@ -100,7 +107,8 @@ class SecurityConfig(
             }.build()
 
     @Bean
-    fun oAuth2AuthenticationSuccessHandler(): ServerAuthenticationSuccessHandler = OAuthAuthenticationSuccessHandler(jwtTokenService)
+    fun oAuth2AuthenticationSuccessHandler(): ServerAuthenticationSuccessHandler =
+        OAuthAuthenticationSuccessHandler(jwtTokenService)
 
     @Bean
     fun corsWebFilter(): CorsWebFilter {

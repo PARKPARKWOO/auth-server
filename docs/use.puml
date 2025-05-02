@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+skinparam usecase {
+  BackgroundColor<<Application>> LightBlue
+  BackgroundColor<<Manager>> LightGreen
+  BackgroundColor<<User>> LightGold
+  BackgroundColor<<Worker>> LightCoral
+}
+
+actor User
+actor Application
+actor Manager
+actor Worker
+
+rectangle "WebSocket & Redis Pub/Sub System" {
+
+  User     --> (Open WebSocket Session)
+  User     --> (Join Queue)
+  Application <<Application>> --> (Register at Manager)
+  Manager     <<Manager>>      --> (Perform Health Checks)
+  Manager     <<Manager>>      --> (Match User ⇆ Worker)
+  Manager     <<Manager>>      --> (Publish Signaling via Pub/Sub)
+
+  Worker      <<Worker>>       --> (Subscribe to Topic)
+  Worker      <<Worker>>       --> (Handle Signaling)
+
+}
+@enduml
