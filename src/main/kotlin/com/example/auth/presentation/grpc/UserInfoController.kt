@@ -9,6 +9,7 @@ import com.example.auth.common.http.error.ErrorCode
 import com.google.protobuf.Empty
 import io.grpc.Context
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
@@ -27,44 +28,29 @@ class UserInfoController(
     private val applicationService: ApplicationService,
 ) : UserInfoServiceGrpcKt.UserInfoServiceCoroutineImplBase() {
     override suspend fun getUserInfoByBearer(request: Empty): AuthProto.UserInfoResponse = coroutineScope {
-//        return runCatching {
         val (applicationId, userId) = getApplicationAndUserId()
-        val user = async {
+        val userDeferred = async {
             endUserFinder.findById(userId.toString())
                 ?: throw NotFoundUserException(ErrorCode.NOT_FOUND_USER, null)
         }
-        val authority =
+        val appRoleDeferred =
             async {
                 val applicationUser = applicationService.getApplicationUser(applicationId, userId.toString())
                     ?: throw NotFoundUserException(ErrorCode.NOT_FOUND_USER, null)
-                applicationService.getApplicationAuthority(applicationUser.authorityId).authority
+                applicationService.getApplicationAuthority(applicationUser.authorityId)
             }
-//        }.onSuccess { user ->
+        val user = userDeferred.await()
+        val appRole = appRoleDeferred.await()
         UserInfoResponse
             .newBuilder()
-            .setId(user.await().id)
-            .setEmail(user.await().email)
-            .setName(user.await().name)
-            .setRole(user.await().role)
-            .setApplicationRole(authority.await())
+            .setId(user.id)
+            .setEmail(user.email)
+            .setName(user.name)
+            .setRole(user.role)
+            .setApplicationRole(appRole.authority)
             .setApplicationId(applicationId)
+            .setAccessLevel(appRole.level)
             .build()
-//        }.onFailure {
-//            log().error(it.stackTraceToString())
-//            when (it) {
-//                is AuthException -> {
-//                    val error = it.errorCode.toGrpcError()
-//                    val metadata = ErrorConverter.attachErrorToMetadata(error = error, data = null)
-//                }
-//                is BusinessException -> {
-//                    val error = it.errorCode.toGrpcError()
-//                    val metadata = ErrorConverter.attachErrorToMetadata(error = error, data = null)
-//                    responseObserver
-//                        ?.onError(INVALID_ARGUMENT.asRuntimeException(metadata))
-//                }
-//                else -> {}
-//            }
-//        }
     }
 
     override suspend fun getUserInfoInApplication(

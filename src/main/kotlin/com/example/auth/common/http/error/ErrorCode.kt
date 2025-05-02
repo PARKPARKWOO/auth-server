@@ -12,13 +12,7 @@ enum class ErrorCode(
     val httpCode: HttpStatusCode,
     val level: LogLevel,
 ) {
-    NO_BEARER_TOKEN("", HttpStatus.UNAUTHORIZED, LogLevel.WARN),
-    EXPIRED_JWT("", HttpStatus.UNAUTHORIZED, LogLevel.WARN),
-    PARSE_JWT_FAILED("", BAD_REQUEST, LogLevel.WARN),
-    REISSUE_JWT_TOKEN_FAILURE("", HttpStatus.UNAUTHORIZED, LogLevel.WARN),
-
     FORBIDDEN("작업을 수행할 권한이 없습니다.", HttpStatus.FORBIDDEN, LogLevel.WARN),
-
     AUTHENTICATION_RESOLVER_ERROR("", HttpStatus.INTERNAL_SERVER_ERROR, LogLevel.ERROR),
     NOT_FOUND_REQUEST("", BAD_REQUEST, LogLevel.WARN),
 

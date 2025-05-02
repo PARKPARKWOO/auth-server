@@ -6,6 +6,7 @@ plugins {
     id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
     id("com.google.protobuf") version "0.9.4"
+    id("org.woo.plugin.version-check") version "0.0.8"
 }
 
 group = "com.example"
@@ -34,10 +35,10 @@ val grpcVersion = "1.63.0"
 extra["springCloudVersion"] = "2023.0.0"
 
 dependencies {
-    implementation("org.woo:domain-auth:0.1.6")
-    implementation("org.woo:http:+")
-    implementation("org.woo:mapper:+")
-    implementation("org.woo:apm:0.2.2")
+    implementation("org.woo:domain-auth:0.1.9")
+    implementation("org.woo:http:0.1.1")
+    implementation("org.woo:mapper:0.0.2")
+    implementation("org.woo:apm:0.2.3")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
@@ -113,7 +114,7 @@ dependencies {
     }
 
     // grpc
-    implementation("org.woo:grpc:0.2.9")
+    implementation("org.woo:grpc:0.2.11")
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     // https://mvnrepository.com/artifact/net.devh/grpc-spring-boot-starter
 //    implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")

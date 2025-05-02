@@ -1,11 +1,10 @@
 package com.example.auth.business.service
 
-import com.example.auth.business.exception.MalFormedTokenException
-import com.example.auth.business.exception.ParseJwtFailedException
-import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.repository.redis.RedisDriver
 import constant.AuthConstant
 import dto.JwtResponseDto
+import exception.MalFormedTokenException
+import exception.ParseJwtFailedException
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Header
 import io.jsonwebtoken.JwtException
@@ -18,7 +17,8 @@ import org.springframework.stereotype.Service
 import org.woo.apm.log.log
 import java.util.Date
 import java.util.UUID
-import com.example.auth.business.exception.ExpiredJwtException as CustomExpiredJwtException
+import kotlin.math.exp
+import exception.ErrorCode as AuthErrorCode
 
 @Service
 class JwtTokenService(
@@ -49,9 +49,9 @@ class JwtTokenService(
         val claims = parseRefreshToken(refreshToken)
         val userId = claims[AuthConstant.USER_ID].toString()
         return redisDriver.getValue(userId, String::class.java)?.let { refreshTokenInRedis ->
-            if (refreshTokenInRedis != refreshToken) throw MalFormedTokenException(ErrorCode.EXPIRED_JWT, null)
+            if (refreshTokenInRedis != refreshToken) throw MalFormedTokenException(AuthErrorCode.EXPIRED_JWT, null)
             buildAccessToken(claims)
-        } ?: throw CustomExpiredJwtException(ErrorCode.EXPIRED_JWT, null)
+        } ?: throw exception.ExpiredJwtException(errorCode = AuthErrorCode.EXPIRED_JWT, null)
     }
 
     suspend fun build(claims: Map<String, Any>): JwtResponseDto {
@@ -104,10 +104,10 @@ class JwtTokenService(
                 .parseClaimsJws(removeBearerToken)
                 .body
         } catch (e: ExpiredJwtException) {
-            throw CustomExpiredJwtException(ErrorCode.EXPIRED_JWT, e)
+            throw exception.ExpiredJwtException(AuthErrorCode.EXPIRED_JWT, e)
         } catch (e: JwtException) {
             log().error("accessToken parse error from $token")
-            throw ParseJwtFailedException(ErrorCode.PARSE_JWT_FAILED, e)
+            throw ParseJwtFailedException(AuthErrorCode.PARSE_JWT_FAILED, e)
         }
 
     suspend fun parseRefreshToken(refreshToken: String): Map<String, Any> =
@@ -120,9 +120,9 @@ class JwtTokenService(
                 .parseClaimsJws(removeBearerToken)
                 .body
         } catch (e: ExpiredJwtException) {
-            throw CustomExpiredJwtException(ErrorCode.EXPIRED_JWT, e)
+            throw exception. ExpiredJwtException(AuthErrorCode.EXPIRED_JWT, e)
         } catch (e: JwtException) {
-            throw ParseJwtFailedException(ErrorCode.PARSE_JWT_FAILED, e)
+            throw ParseJwtFailedException(AuthErrorCode.PARSE_JWT_FAILED, e)
         }
 
     suspend fun getUserIdFromRefreshToken(refreshToken: String): UUID =

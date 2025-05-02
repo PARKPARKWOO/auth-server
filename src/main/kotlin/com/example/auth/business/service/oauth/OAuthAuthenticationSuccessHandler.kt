@@ -24,7 +24,6 @@ import java.time.Duration
 @Component
 class OAuthAuthenticationSuccessHandler(
     private val jwtTokenService: JwtTokenService,
-    private val redisDriver: RedisDriver,
 ) : ServerAuthenticationSuccessHandler {
     override fun onAuthenticationSuccess(
         webFilterExchange: WebFilterExchange,

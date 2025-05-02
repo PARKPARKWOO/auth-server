@@ -1,8 +1,8 @@
 package com.example.auth.presentation.grpc
 
-import com.example.auth.business.exception.NoBearerTokenException
 import com.example.auth.common.http.error.ErrorCode
 import constant.AuthConstant.BEARER_PREFIX
+import exception.NoBearerTokenException
 import io.grpc.Context
 import io.grpc.Contexts
 import io.grpc.Metadata
@@ -13,6 +13,7 @@ import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor
 import org.springframework.stereotype.Component
 import org.woo.grpc.AuthMetadata.AUTHORIZATION_METADATA_KEY
 import org.woo.grpc.AuthMetadata.JWT_TOKEN_CONTEXT_KEY
+import exception.ErrorCode as AuthErrorCode
 
 @Component
 @GrpcGlobalServerInterceptor
@@ -32,8 +33,8 @@ class JwtTokenInterceptor : ServerInterceptor {
             if (token.startsWith(BEARER_PREFIX)) {
                 token.removePrefix(BEARER_PREFIX)
             } else {
-                throw NoBearerTokenException(ErrorCode.NO_BEARER_TOKEN, null)
+                throw NoBearerTokenException(AuthErrorCode.NO_BEARER_TOKEN, null)
             }
-        } ?: throw NoBearerTokenException(ErrorCode.NO_BEARER_TOKEN, null)
+        } ?: throw NoBearerTokenException(AuthErrorCode.NO_BEARER_TOKEN, null)
     }
 }
