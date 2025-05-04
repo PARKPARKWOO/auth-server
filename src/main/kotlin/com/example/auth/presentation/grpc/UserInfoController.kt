@@ -16,6 +16,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import net.devh.boot.grpc.server.service.GrpcService
 import org.springframework.data.domain.PageRequest
 import org.woo.auth.grpc.AuthProto
+import org.woo.auth.grpc.AuthProto.Passport
 import org.woo.auth.grpc.AuthProto.UserInfoResponse
 import org.woo.auth.grpc.UserInfoServiceGrpcKt
 import org.woo.grpc.AuthMetadata.JWT_TOKEN_CONTEXT_KEY
@@ -43,13 +44,21 @@ class UserInfoController(
         val appRole = appRoleDeferred.await()
         UserInfoResponse
             .newBuilder()
-            .setId(user.id)
             .setEmail(user.email)
             .setName(user.name)
-            .setRole(user.role)
             .setApplicationRole(appRole.authority)
-            .setApplicationId(applicationId)
             .setAccessLevel(appRole.level)
+            .build()
+    }
+
+    override suspend fun getPassportByBearer(request: Empty): AuthProto.Passport = coroutineScope {
+        val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
+        val (applicationId, userId) = getApplicationAndUserId(token)
+        val role = jwtTokenService.getRoleFromAccessToken(token)
+        Passport.newBuilder()
+            .setId(userId.toString())
+            .setRole(role)
+            .setApplicationId(applicationId)
             .build()
     }
 
@@ -110,6 +119,12 @@ class UserInfoController(
 
     private suspend fun getApplicationAndUserId(): Pair<String, UUID> {
         val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
+        val userId = jwtTokenService.getUserIdFromAccessToken(token)
+        val applicationId = jwtTokenService.getSignInApplicationIdFromAccessToken(token)
+        return Pair(applicationId, userId)
+    }
+
+    private suspend fun getApplicationAndUserId(token: String): Pair<String, UUID> {
         val userId = jwtTokenService.getUserIdFromAccessToken(token)
         val applicationId = jwtTokenService.getSignInApplicationIdFromAccessToken(token)
         return Pair(applicationId, userId)

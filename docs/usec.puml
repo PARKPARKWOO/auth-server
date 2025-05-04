@@ -1,0 +1,69 @@
+@startuml
+' 좌→우 레이아웃 유지
+left to right direction
+
+' Actor 스타일
+skinparam actorStyle awesome
+
+' Use Case 스타일
+skinparam usecase {
+  BackgroundColor #EEF5FF
+  BorderColor #537897
+  RoundCorner 8
+}
+
+' Rectangle(Cluster) 스타일
+skinparam rectangle {
+  BackgroundColor #F5F5F5
+  BorderColor #666666
+  RoundCorner 12
+}
+
+' Database 스타일
+skinparam database {
+  BackgroundColor #FFF3E0
+  BorderColor #F57C00
+}
+
+' Redis
+database "Redis\n(Session & MQ)" as REDIS
+
+' Actors
+actor "User1"   as U1
+actor "User2"   as U2
+actor "Worker1" as W1
+actor "Worker2" as W2
+
+' Cluster containing pods and master
+rectangle "Backend Server Cluster" as Cluster {
+  usecase "Pod1\n(WebSocket)"       as UC1
+  usecase "Pod2\n(WebSocket)"       as UC2
+  usecase "Master\n(Health-Check)"  as MS
+}
+
+' Connections
+U1 --> UC1 : WebSocket
+U2 --> UC1 : WebSocket
+W1 --> UC1 : WebSocket
+W2 --> UC2 : WebSocket
+
+MS --> UC1 : Health-Check
+MS --> UC2 : Health-Check
+
+UC1 --> REDIS : save session
+UC2 --> REDIS : save session
+
+REDIS --> UC1 : broadcast
+REDIS --> UC2 : broadcast
+
+' Notes
+note right of Cluster
+  • 고유 PK 생성 후
+  • Redis에 등록
+end note
+
+note right of REDIS
+  • 세션 저장소
+  • 메시지 큐
+end note
+@enduml
