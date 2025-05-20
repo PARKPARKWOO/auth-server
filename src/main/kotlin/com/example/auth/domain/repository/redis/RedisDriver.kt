@@ -8,12 +8,15 @@ import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
+import org.redisson.api.RedissonReactiveClient
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Component
+import java.util.concurrent.TimeUnit
 
 @Component
 class RedisDriver(
     private val redisTemplate: ReactiveRedisTemplate<String, Any>,
+    private val redissonClient: RedissonReactiveClient,
 ) {
     suspend fun <T> setValue(key: String, value: T, ttl: Long) {
         if (value != null) {
@@ -78,5 +81,36 @@ class RedisDriver(
             .asFlow()
             .map { ObjectMapper().convertValue(it, object : TypeReference<T>() {}) }
             .toSet()
+    }
+
+    suspend fun tryLock(key: String, waitTimeMs: Long, leaseTimeMs: Long): Boolean {
+        val lock = redissonClient.getLock(key)
+        return lock.tryLock(waitTimeMs, leaseTimeMs, TimeUnit.MILLISECONDS).awaitSingle()
+    }
+
+    suspend fun unlock(key: String) {
+        val lock = redissonClient.getLock(key)
+        try {
+            lock.unlock().awaitSingle()
+        } catch (ignore: IllegalMonitorStateException) {}
+    }
+
+    suspend fun <T> useLockOrNull(
+        key: String,
+        waitTimeMs: Long,
+        leaseTimeMs: Long,
+        action: suspend () -> T
+    ): T? {
+
+        val acquired = tryLock(key, waitTimeMs, leaseTimeMs)
+
+        if (!acquired) {
+            return null
+        }
+        try {
+            return action()
+        } finally {
+            unlock(key)
+        }
     }
 }

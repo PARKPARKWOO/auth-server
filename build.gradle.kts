@@ -114,7 +114,7 @@ dependencies {
     }
 
     // grpc
-    implementation("org.woo:grpc:0.3.0")
+    implementation("org.woo:grpc:0.3.1")
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     // https://mvnrepository.com/artifact/net.devh/grpc-spring-boot-starter
 //    implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")

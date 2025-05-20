@@ -15,6 +15,7 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.woo.apm.log.log
+import org.woo.auth.grpc.TokenProto.JwtTokenResponse
 import java.util.Date
 import java.util.UUID
 import kotlin.math.exp
@@ -92,6 +93,22 @@ class JwtTokenService(
                 refreshTokenSecretKey,
                 SignatureAlgorithm.HS512,
             ).compact()
+    }
+
+    suspend fun rotationToken(refreshToken: String): JwtResponseDto {
+        val claims = parseRefreshToken(refreshToken)
+        val userId = claims[AuthConstant.USER_ID].toString()
+        return redisDriver.getValue(userId, String::class.java)?.let { refreshTokenInRedis ->
+            if (refreshTokenInRedis != refreshToken) throw MalFormedTokenException(AuthErrorCode.EXPIRED_JWT, null)
+            val rotationAccessToken = buildAccessToken(claims)
+            val rotationRefreshToken = buildRefreshToken(claims)
+            JwtResponseDto(
+                accessToken = rotationAccessToken,
+                refreshToken = rotationRefreshToken,
+                accessTokenExpiresIn = accessTokenExpireTime,
+                refreshTokenExpiresIn = refreshTokenExpireTime,
+            )
+        } ?: throw exception.ExpiredJwtException(errorCode = AuthErrorCode.EXPIRED_JWT, null)
     }
 
     fun parseAccessToken(token: String): Map<String, Any> =
