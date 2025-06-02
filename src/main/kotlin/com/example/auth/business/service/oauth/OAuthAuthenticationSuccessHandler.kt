@@ -94,7 +94,7 @@ class OAuthAuthenticationSuccessHandler(
     ): ResponseCookie =
         ResponseCookie
             .from(name, value)
-            .httpOnly(true)
+            .httpOnly(false)
             .secure(true)
             .path("/")
             .maxAge(Duration.ofMillis(maxAge))
