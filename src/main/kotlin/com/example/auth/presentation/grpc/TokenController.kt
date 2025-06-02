@@ -26,7 +26,7 @@ class TokenController(
                 return@useLockOrNull it.toProto()
             }
             jwtTokenService.rotationToken(request.refreshToken).also {
-                redisDriver.setValue(request.idempotentKey, it, TOKEN_CACHE_TTL)
+                redisDriver.setValue(request.idempotentKey, it, it.refreshTokenExpiresIn)
             }.toProto()
         } ?: redisDriver.getValue(request.idempotentKey, JwtResponseDto::class.java)?.toProto() ?: throw StatusException(Status.UNAVAILABLE)
     }
