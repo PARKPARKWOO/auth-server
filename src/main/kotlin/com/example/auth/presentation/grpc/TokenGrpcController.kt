@@ -10,7 +10,7 @@ import org.woo.auth.grpc.TokenProto
 import org.woo.auth.grpc.TokenServiceGrpcKt
 
 @GrpcService
-class TokenController(
+class TokenGrpcController(
     private val jwtTokenService: JwtTokenService,
     private val redisDriver: RedisDriver,
 ): TokenServiceGrpcKt.TokenServiceCoroutineImplBase() {
@@ -26,7 +26,7 @@ class TokenController(
                 return@useLockOrNull it.toProto()
             }
             jwtTokenService.rotationToken(request.refreshToken).also {
-                redisDriver.setValue(request.idempotentKey, it, it.refreshTokenExpiresIn)
+                redisDriver.setValue(request.idempotentKey, it, TOKEN_CACHE_TTL)
             }.toProto()
         } ?: redisDriver.getValue(request.idempotentKey, JwtResponseDto::class.java)?.toProto() ?: throw StatusException(Status.UNAVAILABLE)
     }
