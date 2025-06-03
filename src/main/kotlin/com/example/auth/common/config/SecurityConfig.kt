@@ -114,9 +114,11 @@ class SecurityConfig(
     fun corsWebFilter(): CorsWebFilter {
         val config =
             CorsConfiguration().apply {
-                allowedOrigins = listOf("*")
+                allowedOriginPatterns = listOf("*")
                 allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 allowedHeaders = listOf("Authorization", "Content-Type")
+                allowCredentials = true
+                exposedHeaders = listOf("Set-Cookie", "Authorization")
             }
 
         val source =
