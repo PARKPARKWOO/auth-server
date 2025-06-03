@@ -41,6 +41,7 @@ class OAuthAuthenticationSuccessHandler(
                     jwtResponse = jwtResponse,
                     redirectUrl = socialLoginUser.redirectUrl,
                     redirectType = socialLoginUser.redirectType,
+                    origin = origin,
                 )
             }.then()
         }
