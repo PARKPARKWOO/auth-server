@@ -34,6 +34,7 @@ class OAuthAuthenticationSuccessHandler(
                 authentication?.principal as? AbstractSocialUser
                     ?: return@defer Mono.error<Void>(IllegalArgumentException("Authentication principal is not valid"))
             mono {
+                val origin = webFilterExchange.exchange.request.headers.origin
                 val response = webFilterExchange.exchange.response
                 val jwtResponse = generateJwtTokenAndSaveToken(socialLoginUser.getClaims())
                 response.sendJwtResponseAsRedirect(
@@ -52,11 +53,12 @@ class OAuthAuthenticationSuccessHandler(
         jwtResponse: JwtResponseDto,
         redirectUrl: String?,
         redirectType: RedirectType,
+        origin: String?,
     ) {
 //        val isJson = ReactorContextHolder.isMobileDevice() || redirectType == RedirectType.JSON
         redirectUrl?.let {
             when (redirectType) {
-                RedirectType.REDIRECT_WITH_COOKIE -> this.sendJwtResponseAsCookie(jwtResponse, redirectUrl)
+                RedirectType.REDIRECT_WITH_COOKIE -> this.sendJwtResponseAsCookie(jwtResponse, redirectUrl, origin)
                 RedirectType.JSON -> this.sendJwtResponseAsJson(jwtResponse)
                 RedirectType.QUERY_PARAM -> this.setRedirectConfigurationWithQueryParams(redirectUrl, jwtResponse)
             }
@@ -77,10 +79,14 @@ class OAuthAuthenticationSuccessHandler(
         this.statusCode = HttpStatus.FOUND
     }
 
-    private suspend fun ServerHttpResponse.sendJwtResponseAsCookie(jwtResponse: JwtResponseDto, redirectUrl: String) {
+    private suspend fun ServerHttpResponse.sendJwtResponseAsCookie(jwtResponse: JwtResponseDto, redirectUrl: String, origin: String?) {
         this.apply {
             addCookie(createCookie("accessToken", jwtResponse.accessToken, jwtResponse.accessTokenExpiresIn))
             addCookie(createCookie("refreshToken", jwtResponse.refreshToken, jwtResponse.refreshTokenExpiresIn))
+            headers.add("Access-Control-Allow-Credentials", "true")
+            origin?.let {
+                headers.add("Access-Control-Allow-Origin", it)
+            }
         }
         val uri = URI.create(redirectUrl)
         this.headers.location = uri
