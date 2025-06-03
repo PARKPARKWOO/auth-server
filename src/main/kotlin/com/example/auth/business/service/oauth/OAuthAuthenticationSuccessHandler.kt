@@ -97,6 +97,7 @@ class OAuthAuthenticationSuccessHandler(
             .httpOnly(false)
             .secure(true)
             .path("/")
+            .domain(".platformholder.site")
             .maxAge(Duration.ofMillis(maxAge))
             .sameSite("None")
             .build()
