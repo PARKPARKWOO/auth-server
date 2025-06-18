@@ -33,12 +33,14 @@ import org.springframework.security.oauth2.jose.jws.MacAlgorithm
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
+import reactor.kotlin.core.publisher.toMono
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
@@ -177,25 +179,6 @@ class SecurityConfig(
                 )
             }
         return adapter
-    }
-
-    @Bean
-    fun jwtAuthenticationConverter(): ReactiveJwtAuthenticationConverter {
-        val jwtConverter = ReactiveJwtAuthenticationConverter()
-        jwtConverter.setJwtGrantedAuthoritiesConverter { jwt ->
-            // 원본 클레임 가져오기
-            val raw = jwt.claims["roles"]
-            // String? | List<*>? 둘 다 커버
-            val roles: List<String> = when (raw) {
-                is String -> listOf(raw)
-                is Collection<*> -> raw.filterIsInstance<String>()
-                else -> emptyList()
-            }
-            // 권한으로 변환
-            roles.map { SimpleGrantedAuthority("ROLE_$it") }
-                .toMono()  // Reactor Mono로 감싸서 리턴
-        }
-        return jwtConverter
     }
 
     @Bean
