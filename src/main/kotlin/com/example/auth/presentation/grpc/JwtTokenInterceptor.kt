@@ -23,18 +23,18 @@ class JwtTokenInterceptor : ServerInterceptor {
         headers: Metadata?,
         next: ServerCallHandler<ReqT, RespT>?,
     ): ServerCall.Listener<ReqT> {
-        val jwtToken: String = extractJwtToken(headers)
+        val jwtToken: String? = extractJwtToken(headers)
         val context = Context.current().withValue(JWT_TOKEN_CONTEXT_KEY, jwtToken)
         return Contexts.interceptCall(context, call, headers, next)
     }
 
-    fun extractJwtToken(headers: Metadata?): String {
+    fun extractJwtToken(headers: Metadata?): String? {
         return headers?.get(AUTHORIZATION_METADATA_KEY)?.let { token ->
             if (token.startsWith(BEARER_PREFIX)) {
                 token.removePrefix(BEARER_PREFIX)
             } else {
                 throw NoBearerTokenException(AuthErrorCode.NO_BEARER_TOKEN, null)
             }
-        } ?: throw NoBearerTokenException(AuthErrorCode.NO_BEARER_TOKEN, null)
+        }
     }
 }

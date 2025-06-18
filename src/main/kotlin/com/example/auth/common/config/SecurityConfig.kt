@@ -180,5 +180,24 @@ class SecurityConfig(
     }
 
     @Bean
+    fun jwtAuthenticationConverter(): ReactiveJwtAuthenticationConverter {
+        val jwtConverter = ReactiveJwtAuthenticationConverter()
+        jwtConverter.setJwtGrantedAuthoritiesConverter { jwt ->
+            // 원본 클레임 가져오기
+            val raw = jwt.claims["roles"]
+            // String? | List<*>? 둘 다 커버
+            val roles: List<String> = when (raw) {
+                is String -> listOf(raw)
+                is Collection<*> -> raw.filterIsInstance<String>()
+                else -> emptyList()
+            }
+            // 권한으로 변환
+            roles.map { SimpleGrantedAuthority("ROLE_$it") }
+                .toMono()  // Reactor Mono로 감싸서 리턴
+        }
+        return jwtConverter
+    }
+
+    @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 }

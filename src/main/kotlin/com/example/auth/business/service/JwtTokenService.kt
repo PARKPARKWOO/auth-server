@@ -3,7 +3,9 @@ package com.example.auth.business.service
 import com.example.auth.domain.repository.redis.RedisDriver
 import constant.AuthConstant
 import dto.JwtResponseDto
+import exception.ErrorCode
 import exception.MalFormedTokenException
+import exception.NoBearerTokenException
 import exception.ParseJwtFailedException
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Header
@@ -111,9 +113,10 @@ class JwtTokenService(
         } ?: throw exception.ExpiredJwtException(errorCode = AuthErrorCode.EXPIRED_JWT, null)
     }
 
-    fun parseAccessToken(token: String): Map<String, Any> =
+    fun parseAccessToken(token: String?): Map<String, Any> =
         try {
-            val removeBearerToken = token.removeBearer()
+            val removeBearerToken =
+                token?.removeBearer() ?: throw NoBearerTokenException(ErrorCode.NO_BEARER_TOKEN, null)
             Jwts
                 .parserBuilder()
                 .setSigningKey(accessTokenSecretKey)
@@ -137,7 +140,7 @@ class JwtTokenService(
                 .parseClaimsJws(removeBearerToken)
                 .body
         } catch (e: ExpiredJwtException) {
-            throw exception. ExpiredJwtException(AuthErrorCode.EXPIRED_JWT, e)
+            throw exception.ExpiredJwtException(AuthErrorCode.EXPIRED_JWT, e)
         } catch (e: JwtException) {
             throw ParseJwtFailedException(AuthErrorCode.PARSE_JWT_FAILED, e)
         }
@@ -145,7 +148,7 @@ class JwtTokenService(
     suspend fun getUserIdFromRefreshToken(refreshToken: String): UUID =
         UUID.fromString(parseRefreshToken(refreshToken)[AuthConstant.USER_ID].toString())
 
-    fun getUserIdFromAccessToken(accessToken: String): UUID =
+    fun getUserIdFromAccessToken(accessToken: String?): UUID =
         UUID.fromString(parseAccessToken(accessToken)[AuthConstant.USER_ID].toString())
 
     fun getSignInApplicationIdFromAccessToken(accessToken: String): String =

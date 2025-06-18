@@ -7,7 +7,9 @@ import com.example.auth.business.service.JwtTokenService
 import com.example.auth.business.service.application.ApplicationService
 import com.example.auth.common.http.error.ErrorCode
 import com.google.protobuf.Empty
+import exception.ExpiredJwtException
 import io.grpc.Context
+import io.grpc.Status
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -52,14 +54,21 @@ class UserInfoController(
     }
 
     override suspend fun getPassportByBearer(request: Empty): AuthProto.Passport = coroutineScope {
-        val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
-        val (applicationId, userId) = getApplicationAndUserId(token)
-        val role = jwtTokenService.getRoleFromAccessToken(token)
-        Passport.newBuilder()
-            .setId(userId.toString())
-            .setRole(role)
-            .setApplicationId(applicationId)
-            .build()
+        try {
+            val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
+            val (applicationId, userId) = getApplicationAndUserId(token)
+            val role = jwtTokenService.getRoleFromAccessToken(token)
+            Passport.newBuilder()
+                .setId(userId.toString())
+                .setRole(role)
+                .setApplicationId(applicationId)
+                .build()
+        } catch (e: ExpiredJwtException) {
+            throw Status.UNAUTHENTICATED
+                .withDescription(e.message)
+                .withCause(e)
+                .asRuntimeException()
+        }
     }
 
     override suspend fun getUserInfoInApplication(
