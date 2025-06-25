@@ -2,6 +2,7 @@ package com.example.auth.presentation.grpc.interceptor
 
 import com.example.auth.business.exception.BusinessException
 import exception.AuthException
+import exception.ErrorCode
 import io.grpc.ForwardingServerCallListener
 import io.grpc.Metadata
 import io.grpc.ServerCall
@@ -64,12 +65,12 @@ class GrpcExceptionInterceptor: ServerInterceptor {
         try {
             block()
         } catch (e: AuthException) {
-
+            handleException(e, this)
         } catch (e: BusinessException) {
             handleException(e, this)
         }
     }
     private fun <ReqT, ResT>handleException(e: RuntimeException, call: ServerCall<ReqT, ResT>) {
-        // TODO
+        log().warn(e.message)
     }
 }

@@ -28,7 +28,8 @@ class TokenGrpcController(
             jwtTokenService.rotationToken(request.refreshToken).also {
                 redisDriver.setValue(request.idempotentKey, it, TOKEN_CACHE_TTL)
             }.toProto()
-        } ?: redisDriver.getValue(request.idempotentKey, JwtResponseDto::class.java)?.toProto() ?: throw StatusException(Status.UNAVAILABLE)
+        } ?: redisDriver.getValue(request.idempotentKey, JwtResponseDto::class.java)?.toProto()
+        ?: throw Status.UNAVAILABLE.withDescription("Failed to acquire retry lock").asRuntimeException()
     }
 
     private fun JwtResponseDto.toProto(): TokenProto.JwtTokenResponse =
