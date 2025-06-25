@@ -93,7 +93,7 @@ class RedisDriver(
     suspend fun unlock(key: String) {
         val lock = redissonClient.getLock(key)
         try {
-            lock.unlock().awaitSingle()
+            lock.unlock().awaitSingleOrNull()
         } catch (ignore: IllegalMonitorStateException) {}
     }
 
