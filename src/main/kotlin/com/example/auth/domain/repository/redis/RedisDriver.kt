@@ -86,7 +86,8 @@ class RedisDriver(
 
     suspend fun tryLock(key: String, waitTimeMs: Long, leaseTimeMs: Long): Boolean {
         val lock = redissonClient.getLock(key)
-        return lock.tryLock(waitTimeMs, leaseTimeMs, TimeUnit.MILLISECONDS).awaitSingle()
+        return lock.tryLock(waitTimeMs, leaseTimeMs, TimeUnit.MILLISECONDS).awaitSingleOrNull()
+            ?: false
     }
 
     suspend fun unlock(key: String) {
