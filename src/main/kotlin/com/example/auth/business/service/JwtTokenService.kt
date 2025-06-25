@@ -104,6 +104,7 @@ class JwtTokenService(
             if (refreshTokenInRedis != refreshToken) throw MalFormedTokenException(AuthErrorCode.EXPIRED_JWT, null)
             val rotationAccessToken = buildAccessToken(claims)
             val rotationRefreshToken = buildRefreshToken(claims)
+            redisDriver.setValue(userId, rotationRefreshToken, refreshTokenExpireTime)
             JwtResponseDto(
                 accessToken = rotationAccessToken,
                 refreshToken = rotationRefreshToken,
@@ -154,7 +155,7 @@ class JwtTokenService(
     fun getSignInApplicationIdFromAccessToken(accessToken: String): String =
         parseAccessToken(accessToken)[AuthConstant.APPLICATION_ID].toString()
 
-    fun getRoleFromAccessToken(accessToken: String): String =
+    fun getRoleFromAccessToken(accessToken: String?): String =
         parseAccessToken(accessToken)[AuthConstant.USER_ROLE].toString()
 
     companion object {

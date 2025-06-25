@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.redisson.api.RedissonReactiveClient
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Component
@@ -25,8 +26,8 @@ class RedisDriver(
     }
 
     suspend fun <T> getValue(key: String, clazz: Class<T>): T? {
-        val value = redisTemplate.opsForValue().get(key).awaitSingle()
-        return clazz.cast(value)
+        val value = redisTemplate.opsForValue().get(key).awaitSingleOrNull()
+        return value?.let { clazz.cast(it) }
     }
 
     suspend fun <T> addListForRight(key: String, value: List<T>) {

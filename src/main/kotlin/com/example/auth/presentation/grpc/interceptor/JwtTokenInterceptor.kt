@@ -1,6 +1,5 @@
-package com.example.auth.presentation.grpc
+package com.example.auth.presentation.grpc.interceptor
 
-import com.example.auth.common.http.error.ErrorCode
 import constant.AuthConstant.BEARER_PREFIX
 import exception.NoBearerTokenException
 import io.grpc.Context
@@ -10,12 +9,10 @@ import io.grpc.ServerCall
 import io.grpc.ServerCallHandler
 import io.grpc.ServerInterceptor
 import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor
-import org.springframework.stereotype.Component
 import org.woo.grpc.AuthMetadata.AUTHORIZATION_METADATA_KEY
 import org.woo.grpc.AuthMetadata.JWT_TOKEN_CONTEXT_KEY
 import exception.ErrorCode as AuthErrorCode
 
-@Component
 @GrpcGlobalServerInterceptor
 class JwtTokenInterceptor : ServerInterceptor {
     override fun <ReqT : Any?, RespT : Any?> interceptCall(

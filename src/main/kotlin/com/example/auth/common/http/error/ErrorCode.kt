@@ -35,3 +35,5 @@ fun ErrorCode.toFailedResponseBody(): FailedApiResponseBody =
     )
 
 fun ErrorCode.toGrpcError() = ErrorConverter.toGrpcErrorResponse(message = this.message, status = this.httpCode.value())
+
+fun exception.ErrorCode.toGrpcError() = ErrorConverter.toGrpcErrorResponse(message = message, status = httpCode)
