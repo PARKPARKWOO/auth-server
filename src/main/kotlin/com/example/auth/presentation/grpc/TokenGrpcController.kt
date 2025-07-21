@@ -18,24 +18,27 @@ class TokenGrpcController(
         const val REISSUE_TOKEN_LOCK_WAIT_TIME = 50L
         const val REISSUE_TOKEN_LOCK_LEASE_TIME = 3000L
         const val TOKEN_CACHE_TTL = 300L // 5 min
-        const val ROTATION_IDEMPOTENT_KEY_PREFIX = "rotation:idempotent"
+        const val ROTATION_IDEMPOTENT_LOCK_PREFIX = "LOCK:IDEMPOTENT:"
+        const val ROTATION_IDEMPOTENT_KEY_PREFIX = "IDEMPOTENT:RTR:"
     }
 
     override suspend fun reissueToken(request: TokenProto.ReissueTokenRequest): TokenProto.JwtTokenResponse {
         log().info("incoming reissue-token")
         // TODO: refreshToken 예외처리 필요함
-        val idempotentKey = ROTATION_IDEMPOTENT_KEY_PREFIX + jwtTokenService.getUserIdFromRefreshToken(request.refreshToken).toString()
-        return redisDriver.useLockOrNull(idempotentKey, REISSUE_TOKEN_LOCK_WAIT_TIME, REISSUE_TOKEN_LOCK_LEASE_TIME) {
+        val refreshTokenString = jwtTokenService.getUserIdFromRefreshToken(request.refreshToken).toString()
+        val lockKey = ROTATION_IDEMPOTENT_LOCK_PREFIX + refreshTokenString
+        val valueKey = ROTATION_IDEMPOTENT_KEY_PREFIX + refreshTokenString
+        return redisDriver.useLockOrNull(lockKey, REISSUE_TOKEN_LOCK_WAIT_TIME, REISSUE_TOKEN_LOCK_LEASE_TIME) {
             log().info("use lock")
-            redisDriver.getValue(idempotentKey, JwtResponseDto::class.java)?.let {
+            redisDriver.getValue(valueKey, JwtResponseDto::class.java)?.let {
                 log().info("getValue")
                 return@useLockOrNull it.toProto()
             }
             jwtTokenService.rotationToken(request.refreshToken).also {
                 log().info("rotationToken")
-                redisDriver.setValue(idempotentKey, it, TOKEN_CACHE_TTL)
+                redisDriver.setValue(valueKey, it, TOKEN_CACHE_TTL)
             }.toProto()
-        } ?: redisDriver.getValue(idempotentKey, JwtResponseDto::class.java)?.toProto()
+        } ?: redisDriver.getValue(valueKey, JwtResponseDto::class.java)?.toProto()
         ?: throw Status.UNAVAILABLE.withDescription("Failed to acquire retry lock").asRuntimeException()
     }
 
