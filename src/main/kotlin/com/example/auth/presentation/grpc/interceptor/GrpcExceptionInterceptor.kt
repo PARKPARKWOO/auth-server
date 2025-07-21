@@ -28,7 +28,7 @@ class GrpcExceptionInterceptor: ServerInterceptor {
                 } catch (e: AuthException) {
                     handleException(e, call)
                 } catch (e: BusinessException) {
-
+                    handleException(e, call)
                 }
             }
 

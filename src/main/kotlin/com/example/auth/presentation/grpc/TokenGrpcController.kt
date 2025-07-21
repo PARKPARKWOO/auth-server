@@ -6,8 +6,10 @@ import dto.JwtResponseDto
 import io.grpc.Status
 import io.grpc.StatusException
 import net.devh.boot.grpc.server.service.GrpcService
+import org.woo.apm.log.log
 import org.woo.auth.grpc.TokenProto
 import org.woo.auth.grpc.TokenServiceGrpcKt
+import kotlin.math.log
 
 @GrpcService
 class TokenGrpcController(
@@ -21,11 +23,15 @@ class TokenGrpcController(
     }
 
     override suspend fun reissueToken(request: TokenProto.ReissueTokenRequest): TokenProto.JwtTokenResponse {
+        log().info("incoming reissue-token")
         return redisDriver.useLockOrNull(request.idempotentKey, REISSUE_TOKEN_LOCK_WAIT_TIME, REISSUE_TOKEN_LOCK_LEASE_TIME) {
+            log().info("use lock")
             redisDriver.getValue(request.idempotentKey, JwtResponseDto::class.java)?.let {
+                log().info("getValue")
                 return@useLockOrNull it.toProto()
             }
             jwtTokenService.rotationToken(request.refreshToken).also {
+                log().info("rotationToken")
                 redisDriver.setValue(request.idempotentKey, it, TOKEN_CACHE_TTL)
             }.toProto()
         } ?: redisDriver.getValue(request.idempotentKey, JwtResponseDto::class.java)?.toProto()
