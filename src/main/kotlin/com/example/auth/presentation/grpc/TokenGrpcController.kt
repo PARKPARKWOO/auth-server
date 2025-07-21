@@ -24,17 +24,19 @@ class TokenGrpcController(
 
     override suspend fun reissueToken(request: TokenProto.ReissueTokenRequest): TokenProto.JwtTokenResponse {
         log().info("incoming reissue-token")
-        return redisDriver.useLockOrNull(request.idempotentKey, REISSUE_TOKEN_LOCK_WAIT_TIME, REISSUE_TOKEN_LOCK_LEASE_TIME) {
+        // TODO: refreshToken 예외처리 필요함
+        val refreshTokenString = jwtTokenService.getUserIdFromRefreshToken(request.refreshToken).toString()
+        return redisDriver.useLockOrNull(refreshTokenString, REISSUE_TOKEN_LOCK_WAIT_TIME, REISSUE_TOKEN_LOCK_LEASE_TIME) {
             log().info("use lock")
-            redisDriver.getValue(request.idempotentKey, JwtResponseDto::class.java)?.let {
+            redisDriver.getValue(refreshTokenString, JwtResponseDto::class.java)?.let {
                 log().info("getValue")
                 return@useLockOrNull it.toProto()
             }
             jwtTokenService.rotationToken(request.refreshToken).also {
                 log().info("rotationToken")
-                redisDriver.setValue(request.idempotentKey, it, TOKEN_CACHE_TTL)
+                redisDriver.setValue(refreshTokenString, it, TOKEN_CACHE_TTL)
             }.toProto()
-        } ?: redisDriver.getValue(request.idempotentKey, JwtResponseDto::class.java)?.toProto()
+        } ?: redisDriver.getValue(refreshTokenString, JwtResponseDto::class.java)?.toProto()
         ?: throw Status.UNAVAILABLE.withDescription("Failed to acquire retry lock").asRuntimeException()
     }
 
