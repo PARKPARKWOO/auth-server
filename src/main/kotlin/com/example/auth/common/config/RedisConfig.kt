@@ -33,6 +33,7 @@ class RedisConfig(
     }
 
     @Bean("reactiveRedisConnectionFactory")
+    @Primary
     fun reactiveRedisConnectionFactory(): ReactiveRedisConnectionFactory {
         val config = RedisStandaloneConfiguration(host, port)
         config.password = RedisPassword.of(password)
