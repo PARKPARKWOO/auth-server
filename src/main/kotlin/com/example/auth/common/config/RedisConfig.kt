@@ -14,6 +14,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.ReactiveRedisOperations
 import org.springframework.data.redis.core.ReactiveRedisTemplate
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
@@ -51,15 +52,17 @@ class RedisConfig(
         val stringSerializer = StringRedisSerializer()
         val mapper = ObjectMapper().apply {
             findAndRegisterModules()
+            activateDefaultTyping(this.polymorphicTypeValidator, ObjectMapper.DefaultTyping.NON_FINAL)
         }
-        val jacksonSerializer = Jackson2JsonRedisSerializer(mapper, Any::class.java)
+//        val jacksonSerializer = Jackson2JsonRedisSerializer(mapper, Any::class.java)
 
+        val genericJackson2JsonRedisSerializer = GenericJackson2JsonRedisSerializer(mapper)
         val builder = RedisSerializationContext
             .newSerializationContext<String, Any>(stringSerializer)
         val context = builder
-            .value(jacksonSerializer)
+            .value(genericJackson2JsonRedisSerializer)
             .hashKey(stringSerializer)
-            .hashValue(jacksonSerializer)
+            .hashValue(genericJackson2JsonRedisSerializer)
             .build()
 
         return ReactiveRedisTemplate(rrcf, context)
