@@ -12,6 +12,7 @@ import org.redisson.api.RedissonReactiveClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Component
@@ -24,13 +25,13 @@ class RedisDriver(
 ) {
     suspend fun <T> setValue(key: String, value: T, ttl: Long) {
         if (value != null) {
-            objectRedisTemplate.opsForValue().set(key, value, ttl).awaitSingle()
+            objectRedisTemplate.opsForValue().set(key, value, Duration.ofMillis(ttl)).awaitSingle()
         }
     }
 
-    suspend fun setValue(key: String, value: String, ttl: Long) {
-        stringRedisTemplate.opsForValue().set(key, value, ttl).awaitSingle()
-    }
+//    suspend fun setValue(key: String, value: String, ttl: Long) {
+//        stringRedisTemplate.opsForValue().set(key, value, Duration.ofMillis(ttl)).awaitSingle()
+//    }
 
     suspend fun <T> getValue(key: String, clazz: Class<T>): T? {
         val value = objectRedisTemplate.opsForValue().get(key).awaitSingleOrNull()
