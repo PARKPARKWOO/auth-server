@@ -108,8 +108,11 @@ class JwtTokenService(
         val userId = claims[AuthConstant.USER_ID].toString()
         val key = REFRESH_TOKEN_REDIS_KEY_PREFIX + userId
         log().info("jwtTokenService.rotationToken")
-        return redisDriver.getValue(key, String::class.java)?.let { refreshTokenInRedis ->
-            if (refreshTokenInRedis != refreshToken) throw MalFormedTokenException(AuthErrorCode.EXPIRED_JWT, null)
+        val refreshTokenInRedis = redisDriver.getValue(key, String::class.java)
+        log().info("Redis result: $refreshTokenInRedis")
+        log().info("Redis result is null: ${refreshTokenInRedis == null}")
+        return refreshTokenInRedis?.let { token ->
+            if (token != refreshToken) throw MalFormedTokenException(AuthErrorCode.EXPIRED_JWT, null)
             val rotationAccessToken = buildAccessToken(claims)
             val rotationRefreshToken = buildRefreshToken(claims)
             redisDriver.setValue(key, rotationRefreshToken, refreshTokenExpireTime)
