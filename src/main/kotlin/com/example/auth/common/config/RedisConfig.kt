@@ -35,37 +35,39 @@ class RedisConfig(
     @Bean("reactiveRedisConnectionFactory")
     fun reactiveRedisConnectionFactory(): ReactiveRedisConnectionFactory {
         val config = RedisStandaloneConfiguration(host, port)
-        config.setPassword(RedisPassword.of(password))
+        config.password = RedisPassword.of(password)
         return LettuceConnectionFactory(config)
     }
 
-    @Bean
-    fun redisTemplate(@Qualifier("reactiveRedisConnectionFactory") redisConnectionFactory: ReactiveRedisConnectionFactory): ReactiveRedisTemplate<String, Any> {
-//        val rrcf: ReactiveRedisConnectionFactory = redisConnectionFactory
-//        val serializer = Jackson2JsonRedisSerializer(Any::class.java)
-//        val builder = RedisSerializationContext
-//            .newSerializationContext<String, Any>(StringRedisSerializer())
-//        val context = builder.value(serializer).hashValue(serializer)
-//            .hashKey(serializer).build()
-        val rrcf: ReactiveRedisConnectionFactory = redisConnectionFactory
-
+    @Bean("objectReactiveRedisTemplate")
+    @Primary
+    fun objectReactiveRedisTemplate(factory: ReactiveRedisConnectionFactory): ReactiveRedisTemplate<String, Any> {
         val stringSerializer = StringRedisSerializer()
         val mapper = ObjectMapper().apply {
             findAndRegisterModules()
-            activateDefaultTyping(this.polymorphicTypeValidator, ObjectMapper.DefaultTyping.NON_FINAL)
+            activateDefaultTyping(polymorphicTypeValidator, ObjectMapper.DefaultTyping.NON_FINAL)
         }
-//        val jacksonSerializer = Jackson2JsonRedisSerializer(mapper, Any::class.java)
-
-        val genericJackson2JsonRedisSerializer = GenericJackson2JsonRedisSerializer(mapper)
-        val builder = RedisSerializationContext
-            .newSerializationContext<String, Any>(stringSerializer)
-        val context = builder
-            .value(genericJackson2JsonRedisSerializer)
+        val jsonSerializer = GenericJackson2JsonRedisSerializer(mapper)
+        val context = RedisSerializationContext.newSerializationContext<String, Any>(stringSerializer)
+            .value(jsonSerializer)
             .hashKey(stringSerializer)
-            .hashValue(genericJackson2JsonRedisSerializer)
+            .hashValue(jsonSerializer)
             .build()
 
-        return ReactiveRedisTemplate(rrcf, context)
+        return ReactiveRedisTemplate(factory, context)
+    }
+
+    @Bean("stringReactiveRedisTemplate")
+    fun stringReactiveRedisTemplate(factory: ReactiveRedisConnectionFactory): ReactiveRedisTemplate<String, String> {
+        val stringSerializer = StringRedisSerializer()
+        val context = RedisSerializationContext.newSerializationContext<String, String>(stringSerializer)
+            .key(stringSerializer)
+            .value(stringSerializer)
+            .hashKey(stringSerializer)
+            .hashValue(stringSerializer)
+            .build()
+
+        return ReactiveRedisTemplate(factory, context)
     }
 
     @Bean
