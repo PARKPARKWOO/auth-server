@@ -36,7 +36,9 @@ class JwtTokenService(
     private val redisDriver: RedisDriver,
 ) {
     companion object {
-        const val REFRESH_TOKEN_REDIS_KEY_PREFIX = "REFRESH_TOKEN:"
+        const val REFRESH_TOKEN_REDIS_KEY_PREFIX = "refresh_token:"
+        private const val USER_ID = "user_id:"
+        private const val APPLICATION = "application:"
     }
 
     private val accessTokenSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessTokenSecretKeyString))
@@ -44,7 +46,10 @@ class JwtTokenService(
 
     suspend fun buildAndSave(claims: Map<String, Any>): JwtResponseDto {
         val jwtResponse = build(claims)
-        val key = REFRESH_TOKEN_REDIS_KEY_PREFIX + claims.getValue(AuthConstant.USER_ID).toString()
+        val key = getRefreshTokenKey(
+            userId = claims.getValue(AuthConstant.USER_ID).toString(),
+            applicationId = claims.getValue(AuthConstant.APPLICATION_ID).toString()
+        )
         redisDriver.setValue(
             key,
             jwtResponse.refreshToken,
@@ -113,15 +118,7 @@ class JwtTokenService(
         log().info("Redis result is null: ${refreshTokenInRedis == null}")
         return refreshTokenInRedis?.let { token ->
             if (token != refreshToken) throw MalFormedTokenException(AuthErrorCode.EXPIRED_JWT, null)
-            val rotationAccessToken = buildAccessToken(claims)
-            val rotationRefreshToken = buildRefreshToken(claims)
-            redisDriver.setValue(key, rotationRefreshToken, refreshTokenExpireTime)
-            JwtResponseDto(
-                accessToken = rotationAccessToken,
-                refreshToken = rotationRefreshToken,
-                accessTokenExpiresIn = accessTokenExpireTime,
-                refreshTokenExpiresIn = refreshTokenExpireTime,
-            )
+            buildAndSave(claims)
         } ?: throw exception.ExpiredJwtException(errorCode = AuthErrorCode.EXPIRED_JWT, null)
     }
 
@@ -174,4 +171,7 @@ class JwtTokenService(
         if (this.startsWith(AuthConstant.BEARER_PREFIX)) return this.removePrefix(AuthConstant.BEARER_PREFIX)
         return this
     }
+
+    private fun getRefreshTokenKey(userId: String, applicationId: String) =
+        REFRESH_TOKEN_REDIS_KEY_PREFIX + userId + USER_ID + APPLICATION + applicationId
 }
