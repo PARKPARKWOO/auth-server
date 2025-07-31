@@ -111,7 +111,8 @@ class JwtTokenService(
     suspend fun rotationToken(refreshToken: String): JwtResponseDto {
         val claims = parseRefreshToken(refreshToken)
         val userId = claims[AuthConstant.USER_ID].toString()
-        val key = REFRESH_TOKEN_REDIS_KEY_PREFIX + userId
+        val applicationId = claims[AuthConstant.APPLICATION_ID].toString()
+        val key = getRefreshTokenKey(userId, applicationId)
         log().info("jwtTokenService.rotationToken")
         val refreshTokenInRedis = redisDriver.getValue(key, String::class.java)
         log().info("Redis result: $refreshTokenInRedis")
