@@ -31,6 +31,7 @@ class R2dbcConfig(
         const val CONNECTION_POOL_MAX_SIZE = 50
         const val CONNECTION_POOL_MAX_IDLE_MIN = 5L
         const val DATABASE_SCHEMA = "auth"
+        const val MYSQL_VALIDATION_QUERY = "select 1"
     }
     @Bean
     fun transactionManager(connectionFactory: ConnectionFactory): ReactiveTransactionManager {
@@ -57,6 +58,7 @@ class R2dbcConfig(
         .initialSize(CONNECTION_POOL_MIN_IDLE)
         .minIdle(CONNECTION_POOL_MIN_IDLE)
         .maxSize(CONNECTION_POOL_MAX_SIZE)
+        .validationQuery(MYSQL_VALIDATION_QUERY)
         .maxIdleTime(java.time.Duration.ofMinutes(CONNECTION_POOL_MAX_IDLE_MIN))
         .build()
 

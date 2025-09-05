@@ -16,6 +16,7 @@ spring:
     url: r2dbc:mysql://${mysql.host}:3306/auth?useUnicode=yes&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: ${RDBMS_USERNAME}
     password: ${RDBMS_PASSWORD}
+
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -43,6 +44,7 @@ eureka:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
   instance:
     prefer-ip-address: false
+    hostname: auth-server
 logging:
   level:
     org:
