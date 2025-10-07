@@ -10,6 +10,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.domain.Pageable
@@ -68,4 +69,6 @@ class ApplicationService(
         applicationUser.updateRole(authorityId)
         applicationUserRepository.save(applicationUser).awaitSingle()
     }
+
+    fun getApplicationInfo(): Flow<Application> = applicationRepository.findAll().asFlow()
 }

@@ -2,6 +2,7 @@ package com.example.auth.business.service
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseCookie
+import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Service
 import java.time.Duration
 
@@ -26,4 +27,28 @@ class CookieService (
             .maxAge(Duration.ofMillis(maxAge))
             .sameSite("None")
             .build()
+
+    fun clearCookie(response: ServerHttpResponse) {
+        response.addCookie(
+            ResponseCookie
+                .from("accessToken", "")
+                .path("/")
+                .maxAge(Duration.ZERO) // 삭제
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .build(),
+        )
+
+        response.addCookie(
+            ResponseCookie
+                .from("refreshToken", "")
+                .path("/")
+                .maxAge(Duration.ZERO) // 삭제
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .build(),
+        )
+    }
 }

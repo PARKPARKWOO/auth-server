@@ -3,6 +3,7 @@ package com.example.auth.business.service
 import com.example.auth.domain.repository.redis.RedisDriver
 import constant.AuthConstant
 import dto.JwtResponseDto
+import dto.Passport
 import exception.ErrorCode
 import exception.MalFormedTokenException
 import exception.NoBearerTokenException
@@ -14,7 +15,9 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Service
 import org.woo.apm.log.log
 import org.woo.auth.grpc.TokenProto.JwtTokenResponse
@@ -34,6 +37,7 @@ class JwtTokenService(
     @Value("\${jwt.refresh-token.expire-millis}")
     private val refreshTokenExpireTime: Long,
     private val redisDriver: RedisDriver,
+    private val cookieService: CookieService,
 ) {
     companion object {
         const val REFRESH_TOKEN_REDIS_KEY_PREFIX = "refresh_token:"
@@ -175,4 +179,10 @@ class JwtTokenService(
 
     private fun getRefreshTokenKey(userId: String, applicationId: String) =
         REFRESH_TOKEN_REDIS_KEY_PREFIX + userId + USER_ID + APPLICATION + applicationId
+
+    suspend fun revoke(response: ServerHttpResponse, passport: Passport) {
+        val key = getRefreshTokenKey(passport.userId.toString(), passport.signInApplicationId)
+        cookieService.clearCookie(response)
+        redisDriver.delete(key).awaitSingle()
+    }
 }

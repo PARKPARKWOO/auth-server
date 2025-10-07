@@ -7,11 +7,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.redisson.api.RedissonReactiveClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.redis.core.ReactiveRedisTemplate
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
+import reactor.core.publisher.Mono
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -28,6 +31,8 @@ class RedisDriver(
             objectRedisTemplate.opsForValue().set(key, value, Duration.ofMillis(ttl)).awaitSingle()
         }
     }
+
+    fun delete(key: String): Mono<Long> = objectRedisTemplate.delete(key)
 
 //    suspend fun setValue(key: String, value: String, ttl: Long) {
 //        stringRedisTemplate.opsForValue().set(key, value, Duration.ofMillis(ttl)).awaitSingle()
