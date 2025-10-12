@@ -23,7 +23,7 @@ class TokenController (
         TODO()
     }
 
-    @PostMapping("/oauth/revoke")
+    @PostMapping("/token/revoke")
     suspend fun revokeToken(
         @AuthenticationUser
         @Parameter(hidden = true)
