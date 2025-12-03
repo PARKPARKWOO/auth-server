@@ -1,4 +1,4 @@
-FROM openjdk:17-oracle
+FROM eclipse-temurin:17-jdk
 
 # Pyroscope Application Name and Server Address
 ARG PYROSCOPE_APPLICATION_NAME
@@ -18,4 +18,5 @@ COPY ${JAR_FILE} app.jar
 ADD https://github.com/grafana/pyroscope-java/releases/download/v0.15.2/pyroscope.jar /pyroscope.jar
 
 # Set the entry point
+#ENTRYPOINT ["java", "-javaagent:/pyroscope.jar", "-jar", "app.jar"]
 ENTRYPOINT ["java", "-javaagent:/pyroscope.jar", "-jar", "app.jar"]

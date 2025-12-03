@@ -185,4 +185,10 @@ class JwtTokenService(
         cookieService.clearCookie(response)
         redisDriver.delete(key).awaitSingle()
     }
+    suspend fun revoke(accessToken: String) {
+        val userId = getUserIdFromAccessToken(accessToken)
+        val applicationId = getSignInApplicationIdFromAccessToken(accessToken)
+        val key = getRefreshTokenKey(userId.toString(), applicationId)
+        redisDriver.delete(key).awaitSingle()
+    }
 }

@@ -70,7 +70,7 @@ data class ClientRegistrationInfoDto(
             .authorizationUri(KAKAO_AUTHORIZATION_URL)
             .jwkSetUri(KAKAO_JWK_URI)
             .clientName(SocialProvider.KAKAO.clientNamePrefix + applicationName)
-            .userNameAttributeName(IdTokenClaimNames.SUB)
+            .userNameAttributeName("id")
             .build()
 
     private fun createGoogleClientRegistration(): ClientRegistration =

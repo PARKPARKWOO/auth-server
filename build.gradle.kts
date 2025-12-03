@@ -38,7 +38,7 @@ dependencies {
     implementation("org.woo:domain-auth:0.2.2")
     implementation("org.woo:http:0.2.1")
     implementation("org.woo:mapper:0.0.2")
-    implementation("org.woo:apm:0.2.3")
+    implementation("org.woo:apm:0.2.7")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
@@ -114,7 +114,7 @@ dependencies {
     }
 
     // grpc
-    implementation("org.woo:grpc:0.6.1")
+    implementation("org.woo:grpc:0.7.0")
     implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
     // https://mvnrepository.com/artifact/net.devh/grpc-spring-boot-starter
 //    implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")

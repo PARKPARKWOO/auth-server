@@ -2,12 +2,15 @@ package com.example.auth.presentation.grpc
 
 import com.example.auth.business.service.JwtTokenService
 import com.example.auth.domain.repository.redis.RedisDriver
+import com.google.protobuf.Empty
 import dto.JwtResponseDto
+import io.grpc.Context
 import io.grpc.Status
 import net.devh.boot.grpc.server.service.GrpcService
 import org.woo.apm.log.log
 import org.woo.auth.grpc.TokenProto
 import org.woo.auth.grpc.TokenServiceGrpcKt
+import org.woo.grpc.AuthMetadata.JWT_TOKEN_CONTEXT_KEY
 
 @GrpcService
 class TokenGrpcController(
@@ -40,6 +43,12 @@ class TokenGrpcController(
             }.toProto()
         } ?: redisDriver.getValue(valueKey, JwtResponseDto::class.java)?.toProto()
         ?: throw Status.UNAVAILABLE.withDescription("Failed to acquire retry lock").asRuntimeException()
+    }
+
+    override suspend fun revokeToken(request: Empty): Empty {
+        val accessToken = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
+        jwtTokenService.revoke(accessToken)
+        return Empty.getDefaultInstance()
     }
 
     private fun JwtResponseDto.toProto(): TokenProto.JwtTokenResponse =
