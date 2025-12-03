@@ -66,11 +66,13 @@ data class ClientRegistrationInfoDto(
             .tokenUri(KAKAO_TOKEN_URI)
             .redirectUri(DEFAULT_REDIRECT_URL)
             .userInfoUri(KAKAO_USER_INFO_URI)
+            // 카카오의 userInfo 응답이 OIDC 표준 형식이 아니므로 CustomOidcService에서 에러 핸들링 필요
+            // userInfo 호출 실패 시 ID Token만 사용하도록 처리
             .issuerUri(KAKAO_ISSUER_URI)
             .authorizationUri(KAKAO_AUTHORIZATION_URL)
             .jwkSetUri(KAKAO_JWK_URI)
             .clientName(SocialProvider.KAKAO.clientNamePrefix + applicationName)
-            .userNameAttributeName("id")
+            .userNameAttributeName("id") // 카카오 userInfo의 id 필드 사용 (userInfo 실패 시 ID Token의 sub 사용)
             .build()
 
     private fun createGoogleClientRegistration(): ClientRegistration =

@@ -30,7 +30,38 @@ class CustomOidcService(
 ) : ReactiveOAuth2UserService<OidcUserRequest, OidcUser> {
     override fun loadUser(userRequest: OidcUserRequest?): Mono<OidcUser> {
         val oidcReactiveOAuth2UserService = OidcReactiveOAuth2UserService()
+        
+        // userInfo 호출 시도 (카카오의 경우 OIDC 표준 형식이 아니어서 실패할 수 있음)
         val loadUser = oidcReactiveOAuth2UserService.loadUser(userRequest)
+            .onErrorResume { error ->
+                // userInfo 호출 실패 시 ID Token만 사용하여 OidcUser 생성
+                // 카카오의 userInfo 응답이 OIDC 표준 형식이 아니어서 발생하는 오류 처리
+                if (error.message?.contains("invalid_user_info_response") == true || 
+                    error.message?.contains("user_info") == true) {
+                    // ID Token만으로 OidcUser 생성
+                    val idToken = userRequest?.idToken
+                    if (idToken != null) {
+                        // ID Token의 클레임을 attributes로 변환
+                        val attributes = mutableMapOf<String, Any>()
+                        idToken.claims.forEach { (key, value) ->
+                            attributes[key] = value ?: ""
+                        }
+                        
+                        // OidcUser 생성 (userInfo 없이 ID Token만 사용)
+                        Mono.just(
+                            org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser(
+                                idToken.authorities,
+                                idToken,
+                                null // userInfo는 null로 설정
+                            )
+                        )
+                    } else {
+                        Mono.error(error)
+                    }
+                } else {
+                    Mono.error(error)
+                }
+            }
 
         return loadUser.flatMap { oauth2User ->
             mono {

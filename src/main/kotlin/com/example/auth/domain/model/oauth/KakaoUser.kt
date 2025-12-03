@@ -16,7 +16,12 @@ data class KakaoUser(
 
     private fun getKakaoAccount(): LinkedHashMap<*, *>? = oAuth2User.attributes["kakao_account"] as? LinkedHashMap<*, *>
 
-    override fun getId(): String = oAuth2User.name
+    override fun getId(): String {
+        // userInfo가 있으면 id 필드 사용, 없으면 ID Token의 sub 사용
+        return oAuth2User.attributes["id"]?.toString()
+            ?: oAuth2User.attributes["sub"]?.toString()
+            ?: oAuth2User.name
+    }
 
     override fun getNickname(): String? {
         val oidcUser = oAuth2User as? OidcUser
