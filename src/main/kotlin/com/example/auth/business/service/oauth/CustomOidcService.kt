@@ -15,6 +15,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.reactor.mono
 import model.Role
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService
@@ -41,18 +42,12 @@ class CustomOidcService(
                     // ID Token만으로 OidcUser 생성
                     val idToken = userRequest?.idToken
                     if (idToken != null) {
-                        // ID Token의 클레임을 attributes로 변환
-                        val attributes = mutableMapOf<String, Any>()
-                        idToken.claims.forEach { (key, value) ->
-                            attributes[key] = value ?: ""
-                        }
-                        
                         // OidcUser 생성 (userInfo 없이 ID Token만 사용)
+                        // authorities는 빈 컬렉션 사용 (ID Token에는 authorities 정보가 없음)
                         Mono.just(
                             org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser(
-                                idToken.authorities,
+                                emptyList(), // 빈 authorities 컬렉션
                                 idToken,
-                                null // userInfo는 null로 설정
                             )
                         )
                     } else {
