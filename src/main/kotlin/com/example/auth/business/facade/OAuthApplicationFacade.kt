@@ -25,6 +25,9 @@ class OAuthApplicationFacade(
     private val registrationService: RegistrationService,
     private val applicationOAuthService: ApplicationOAuthService,
 ) {
+    suspend fun findApplicationOAuthProvider(applicationId: Long) = 
+        applicationOAuthService.findById(applicationId)
+
     suspend fun createApplicationUserIfNotExist(
         registrationId: Long,
         userId: String,

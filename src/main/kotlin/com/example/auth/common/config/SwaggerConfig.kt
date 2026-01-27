@@ -37,9 +37,9 @@ open class SwaggerConfig {
         const val AUTHORIZATION_BEARER_SECURITY_SCHEME_NAME = "Authorization: Bearer ACCESS_TOKEN"
     }
 }
-
 val AuthorizationBearerSecurityScheme: SecurityScheme = SecurityScheme()
     .name(AUTHORIZATION_BEARER_SECURITY_SCHEME_NAME)
     .type(SecurityScheme.Type.HTTP)
     .scheme("Bearer")
     .bearerFormat("JWT")
+
