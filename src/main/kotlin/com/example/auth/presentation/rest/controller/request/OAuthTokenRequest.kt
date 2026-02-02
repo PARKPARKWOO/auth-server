@@ -5,6 +5,7 @@ import com.example.auth.domain.model.oauth.SocialProvider
 data class OAuthTokenRequest(
     val provider: SocialProvider,
     val accessToken: String,
-    val applicationId: String? = null, // 앱에서 전달받은 application ID (선택사항)
+    /** Application entity ID (String, e.g. UUID). provider + applicationId 로 ApplicationOAuthProvider 조회 */
+    val applicationId: String? = null,
 )
 

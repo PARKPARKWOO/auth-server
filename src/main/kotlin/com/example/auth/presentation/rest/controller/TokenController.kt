@@ -32,20 +32,15 @@ class TokenController (
     suspend fun getToken(
         @RequestBody request: OAuthTokenRequest,
     ): SucceededApiResponseBody<JwtResponseDto> {
-        // 1. 요청 파라미터 검증
-        val applicationId = request.applicationId?.toLong()
+        // 1. 요청 파라미터 검증 (applicationId = Application.id, String)
+        val applicationId = request.applicationId
             ?: throw BusinessException(ErrorCode.NOT_FOUND_REGISTRATION, null)
         
-        // 2. Application OAuth Provider 존재 여부 확인
-        val applicationOAuthProvider = oAuthApplicationFacade.findApplicationOAuthProvider(applicationId)
+        // 2. Application OAuth Provider 조회 (applicationId + provider 조합)
+        val applicationOAuthProvider = oAuthApplicationFacade.findApplicationOAuthProvider(applicationId, request.provider)
             ?: throw BusinessException(ErrorCode.NOT_FOUND_REGISTRATION, null)
         
-        // 3. Provider 검증
-        if (applicationOAuthProvider.provider != request.provider) {
-            throw BusinessException(ErrorCode.NOT_FOUND_REGISTRATION, null)
-        }
-        
-        // 4. 카카오 토큰 검증 및 사용자 정보 조회
+        // 3. 카카오 토큰 검증 및 사용자 정보 조회
         val oAuth2User = when (request.provider) {
             SocialProvider.KAKAO -> kakaoTokenService.getUserInfo(request.accessToken)
             else -> throw BusinessException(
@@ -64,15 +59,15 @@ class TokenController (
             Instant.now().plusSeconds(3600) // 기본값: 1시간 (실제로는 카카오에서 받은 만료 시간 사용 권장)
         )
         
-        // 6. 사용자 생성/조회 및 SocialLoginUser 생성
+        // 6. 사용자 생성/조회 및 SocialLoginUser 생성 (registrationId = ApplicationOAuthProvider.id)
         val (endUser, socialUser) = oAuthApplicationFacade.createEndUserIfNotExist(
             oAuth2User,
-            applicationId.toString(),
+            applicationOAuthProvider.id.toString(),
             oAuth2AccessToken
         )
         
         // 7. Application User 생성/조회
-        oAuthApplicationFacade.createApplicationUserIfNotExist(applicationId, endUser.id.toString())
+        oAuthApplicationFacade.createApplicationUserIfNotExist(applicationOAuthProvider.id, endUser.id.toString())
         
         // 8. JWT 발급
         val jwtResponse = jwtTokenService.buildAndSave(socialUser.getClaims())

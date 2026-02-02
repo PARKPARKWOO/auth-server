@@ -12,6 +12,7 @@ import com.example.auth.domain.model.oauth.GoogleUser
 import com.example.auth.domain.model.oauth.KakaoUser
 import com.example.auth.domain.model.oauth.NaverUser
 import com.example.auth.domain.model.oauth.SocialLoginUser
+import com.example.auth.domain.model.oauth.SocialProvider
 import com.example.auth.domain.model.oauth.SocialProvider.BAND
 import com.example.auth.domain.model.oauth.SocialProvider.GOOGLE
 import com.example.auth.domain.model.oauth.SocialProvider.KAKAO
@@ -99,6 +100,9 @@ class ApplicationOAuthService(
     }
 
     suspend fun findById(id: Long): ApplicationOAuthProvider? = applicationOAuthProviderRepository.findById(id).awaitSingleOrNull()
+
+    suspend fun findByApplicationIdAndProvider(applicationId: String, provider: SocialProvider): ApplicationOAuthProvider? =
+        applicationOAuthProviderRepository.findByApplicationIdAndProvider(applicationId, provider).awaitSingleOrNull()
 
     suspend fun convertSocialUser(
         oAuth2User: OAuth2User,
