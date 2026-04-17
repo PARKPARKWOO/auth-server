@@ -41,7 +41,8 @@ management:
       probes:
         enabled: true
 pyroscope:
-  address: ${PYROSCOPE_SERVER_ADDRESS}
+  server:
+    address: ${PYROSCOPE_SERVER_ADDRESS}
 eureka:
   client:
     service-url:
