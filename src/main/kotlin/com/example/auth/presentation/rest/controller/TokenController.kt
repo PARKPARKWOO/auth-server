@@ -90,8 +90,10 @@ class TokenController (
     suspend fun reissueToken(
         @RequestBody
         request: ReissueTokenRequest,
-    ): SucceededApiResponseBody<String> {
-        val accessToken = jwtTokenService.reissueToken(request.refreshToken)
-        return SucceededApiResponseBody(accessToken)
+    ): SucceededApiResponseBody<JwtResponseDto> {
+        // RFC 6819 Refresh Token Rotation: 새 access + 새 refresh 모두 발급해 반환.
+        // gRPC 경로(TokenGrpcController)와 동일하게 rotationToken 사용해 일관성 확보.
+        val response = jwtTokenService.rotationToken(request.refreshToken)
+        return SucceededApiResponseBody(response)
     }
 }
