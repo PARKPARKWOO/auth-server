@@ -32,25 +32,7 @@ class UserInfoController(
 ) : UserInfoServiceGrpcKt.UserInfoServiceCoroutineImplBase() {
     override suspend fun getUserInfoByBearer(request: Empty): AuthProto.UserInfoResponse = coroutineScope {
         val (applicationId, userId) = getApplicationAndUserId()
-        val userDeferred = async {
-            endUserFinder.findById(userId.toString())
-                ?: throw NotFoundUserException(ErrorCode.NOT_FOUND_USER, null)
-        }
-        val appRoleDeferred =
-            async {
-                val applicationUser = applicationService.getApplicationUser(applicationId, userId.toString())
-                    ?: throw NotFoundUserException(ErrorCode.NOT_FOUND_USER, null)
-                applicationService.getApplicationAuthority(applicationUser.authorityId)
-            }
-        val user = userDeferred.await()
-        val appRole = appRoleDeferred.await()
-        UserInfoResponse
-            .newBuilder()
-            .setEmail(user.email)
-            .setName(user.name)
-            .setApplicationRole(appRole.authority)
-            .setAccessLevel(appRole.level)
-            .build()
+        buildUserInfo(applicationId, userId)
     }
 
     override suspend fun getPassportByBearer(request: Empty): AuthProto.Passport = coroutineScope {
@@ -58,10 +40,12 @@ class UserInfoController(
             val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
             val (applicationId, userId) = getApplicationAndUserId(token)
             val role = jwtTokenService.getRoleFromAccessToken(token)
+            val userInfo = buildUserInfo(applicationId, userId)
             Passport.newBuilder()
                 .setId(userId.toString())
                 .setRole(role)
                 .setApplicationId(applicationId)
+                .setUserInfo(userInfo)
                 .build()
         } catch (e: ExpiredJwtException) {
             throw Status.UNAUTHENTICATED
@@ -137,6 +121,28 @@ class UserInfoController(
         val userId = jwtTokenService.getUserIdFromAccessToken(token)
         val applicationId = jwtTokenService.getSignInApplicationIdFromAccessToken(token)
         return Pair(applicationId, userId)
+    }
+
+    private suspend fun buildUserInfo(applicationId: String, userId: UUID): UserInfoResponse = coroutineScope {
+        val userDeferred = async {
+            endUserFinder.findById(userId.toString())
+                ?: throw NotFoundUserException(ErrorCode.NOT_FOUND_USER, null)
+        }
+        val appRoleDeferred =
+            async {
+                val applicationUser = applicationService.getApplicationUser(applicationId, userId.toString())
+                    ?: throw NotFoundUserException(ErrorCode.NOT_FOUND_USER, null)
+                applicationService.getApplicationAuthority(applicationUser.authorityId)
+            }
+        val user = userDeferred.await()
+        val appRole = appRoleDeferred.await()
+        val responseBuilder = UserInfoResponse
+            .newBuilder()
+            .setApplicationRole(appRole.authority)
+            .setAccessLevel(appRole.level)
+        user.email?.let(responseBuilder::setEmail)
+        user.name?.let(responseBuilder::setName)
+        responseBuilder.build()
     }
 
     private suspend fun verifyUser(userId: String, applicationId: String) {

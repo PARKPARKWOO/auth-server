@@ -101,7 +101,8 @@ class OAuthAuthenticationSuccessHandler(
     ): ResponseCookie =
         ResponseCookie
             .from(name, value)
-            .httpOnly(false)
+            // P0-#2: httpOnly. SSO 콜백 시 박는 토큰 쿠키도 동일 정책.
+            .httpOnly(true)
             .secure(true)
             .path("/")
             .domain(".platformholder.site")

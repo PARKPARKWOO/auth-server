@@ -73,6 +73,34 @@ class SecurityConfig(
                 "/v3/api-docs/**",
                 "/webjars/**",
             )
+
+        // 공개 인증 진입점: 토큰 발급/재발급, OAuth 콜백, 로그인, discovery
+        // (revoke 는 인증 필요하므로 의도적으로 제외)
+        val AUTH_PUBLIC_WHITELIST =
+            arrayOf(
+                "/api/v1/auth/oauth/token",
+                "/api/v1/auth/token/reissue",
+                "/api/v1/auth/application/*",
+                "/oauth2/authorization/**",
+                "/login/oauth2/code/**",
+                "/oauth2/jwks",
+                "/oauth2/token",
+                "/.well-known/**",
+                "/login",
+            )
+
+        val ACTUATOR_PUBLIC_WHITELIST =
+            arrayOf(
+                "/actuator/health",
+                "/actuator/info",
+                "/actuator/prometheus",
+            )
+
+        val ADMIN_ONLY_PATTERNS =
+            arrayOf(
+                "/api/v1/auth/registration/**",
+                "/actuator/**",
+            )
     }
 
     @Bean
@@ -89,16 +117,13 @@ class SecurityConfig(
             }
             .addFilterBefore(loggingFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .authorizeExchange { exchange ->
-                exchange.pathMatchers("/**", "/login").permitAll()
                 exchange
-                    .pathMatchers("/api/v1/auth/**")
-                    .permitAll()
-                    .pathMatchers(*SWAGGER_WHITELIST)
-                    .permitAll()
-                    .pathMatchers(HttpMethod.OPTIONS)
-                    .permitAll()
-                    .anyExchange()
-                    .authenticated()
+                    .pathMatchers(HttpMethod.OPTIONS).permitAll()
+                    .pathMatchers(*AUTH_PUBLIC_WHITELIST).permitAll()
+                    .pathMatchers(*SWAGGER_WHITELIST).permitAll()
+                    .pathMatchers(*ACTUATOR_PUBLIC_WHITELIST).permitAll()
+                    .pathMatchers(*ADMIN_ONLY_PATTERNS).hasAuthority("ROLE_ADMIN")
+                    .anyExchange().authenticated()
             }.formLogin(ServerHttpSecurity.FormLoginSpec::disable)
             .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
             .oauth2ResourceServer { oauth2 ->

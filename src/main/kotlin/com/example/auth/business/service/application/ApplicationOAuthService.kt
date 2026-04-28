@@ -60,26 +60,6 @@ class ApplicationOAuthService(
 //        }
 //    }
 
-    suspend fun findClientRegistrationInfoDto(): MutableList<ClientRegistrationInfoDto> {
-        val applicationList = applicationRepository.findAll().collectList().awaitSingle()
-        val applicationOAuthList = applicationOAuthProviderRepository.findAll().collectList().awaitSingle()
-
-        val clientRegistrationInfoDtoList = applicationOAuthList.mapNotNull { applicationOAuth ->
-            val application = applicationList.find { it.id == applicationOAuth.applicationId }
-            application?.let {
-                ClientRegistrationInfoDto(
-                    id = applicationOAuth.id,
-                    applicationName = application.name,
-                    clientSecret = applicationOAuth.clientSecret,
-                    clientId = applicationOAuth.clientId,
-                    provider = applicationOAuth.provider,
-                )
-            }
-        }.toMutableList()
-
-        return clientRegistrationInfoDtoList
-    }
-
     suspend fun register(
         command: RegisterApplicationOAuthProviderCommand,
     ): Long {
