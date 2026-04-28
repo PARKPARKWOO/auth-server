@@ -40,13 +40,16 @@ class UserInfoController(
             val token = JWT_TOKEN_CONTEXT_KEY.get(Context.current())
             val (applicationId, userId) = getApplicationAndUserId(token)
             val role = jwtTokenService.getRoleFromAccessToken(token)
-            val userInfo = buildUserInfo(applicationId, userId)
-            Passport.newBuilder()
+            val builder = Passport.newBuilder()
                 .setId(userId.toString())
                 .setRole(role)
                 .setApplicationId(applicationId)
-                .setUserInfo(userInfo)
-                .build()
+            // userInfo 는 best-effort 로드. application_user 가 없는 사용자(ex. cross-app
+            // 토큰으로 첫 진입) 에게 buildUserInfo 가 NotFoundUserException 을 던지면 게이트웨이가
+            // gRPC StatusException 으로 받아 500 으로 새어나갔던 회귀 픽스. Passport 자체는 항상 발급.
+            runCatching { buildUserInfo(applicationId, userId) }
+                .onSuccess { builder.setUserInfo(it) }
+            builder.build()
         } catch (e: ExpiredJwtException) {
             throw Status.UNAUTHENTICATED
                 .withDescription(e.message)
