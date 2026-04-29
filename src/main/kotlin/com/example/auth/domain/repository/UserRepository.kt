@@ -85,6 +85,11 @@ class CustomUserRepositoryImpl(
         email: String?,
         name: String?,
     ) {
+        // 핫픽스: 이전엔 SQL 은 email/name null 여부로 conditional 빌드되는데 binding 은 무조건 `name!!` 으로
+        // 호출되어 name=null 인 경우 NPE → OAuth callback 흐름의 endUserWriter.update 가 500. 두 필드 모두
+        // 변경 없으면 update 자체를 건너뛰고, 있는 필드만 binding 한다.
+        if (email == null && name == null) return
+
         val sql = StringBuffer("UPDATE user set ")
         if (email != null) {
             sql.append("`$EMAIL_COLUMN` = :$EMAIL_BIND, ")
@@ -95,13 +100,12 @@ class CustomUserRepositoryImpl(
         if (sql.endsWith(", ")) {
             sql.setLength(sql.length - 2)
         }
-
         sql.append(" WHERE `$USER_ID_COLUMN` = :$USER_ID_BIND")
 
-        databaseClient
-            .sql(sql.toString())
-            .bind(NAME_BIND, name!!)
-            .bind(USER_ID_BIND, id)
+        var spec = databaseClient.sql(sql.toString())
+        if (email != null) spec = spec.bind(EMAIL_BIND, email)
+        if (name != null) spec = spec.bind(NAME_BIND, name)
+        spec.bind(USER_ID_BIND, id)
             .fetch()
             .awaitRowsUpdated()
     }
