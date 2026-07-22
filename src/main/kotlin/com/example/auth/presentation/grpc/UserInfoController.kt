@@ -52,8 +52,7 @@ class UserInfoController(
             builder.build()
         } catch (e: ExpiredJwtException) {
             throw Status.UNAUTHENTICATED
-                .withDescription(e.message)
-                .withCause(e)
+                .withDescription(exception.ErrorCode.EXPIRED_JWT.name)
                 .asRuntimeException()
         }
     }
