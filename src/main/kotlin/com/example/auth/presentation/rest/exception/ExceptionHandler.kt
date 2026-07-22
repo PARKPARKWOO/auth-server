@@ -2,13 +2,10 @@ package com.example.auth.presentation.rest.exception
 
 import com.example.auth.business.exception.BusinessException
 import exception.AuthException
-import exception.ErrorCode
 import org.springframework.boot.logging.LogLevel
-import org.springframework.http.HttpRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
-import org.springframework.web.server.ServerWebExchange
 import org.woo.apm.log.log
 import org.woo.http.FailedApiResponseBody
 import exception.LogLevel as AuthLogLevel
@@ -16,60 +13,48 @@ import exception.LogLevel as AuthLogLevel
 @RestControllerAdvice
 class ExceptionHandler {
     @ExceptionHandler(AuthException::class)
-    fun handleAuthException(e: AuthException, exchange: ServerWebExchange): ResponseEntity<FailedApiResponseBody> {
-        logging(e, exchange.request.uri.path)
+    fun handleAuthException(e: AuthException): ResponseEntity<FailedApiResponseBody> {
+        logging(e)
         val body = FailedApiResponseBody(e.errorCode.name, e.errorCode.message)
         return ResponseEntity.status(e.errorCode.httpCode).body(body)
     }
 
-    private fun logging(e: Exception, path: String) {
+    private fun logging(e: Exception) {
         when (e) {
             is AuthException -> {
-                handleAuthExceptionLogging(e, e.errorCode.level, path)
+                handleAuthExceptionLogging(e.errorCode.level)
             }
 
             is BusinessException -> {
-                handleExceptionLogging(e, e.errorCode.level, path)
+                handleBusinessExceptionLogging(e.errorCode.level)
             }
 
             else -> {
-                handleExceptionLogging(e, LogLevel.ERROR, path)
+                log().error("authentication request failed")
             }
         }
     }
 
-    private fun handleExceptionLogging(e: Exception, level: LogLevel, path: String) {
-        val message: String = logMessage(null, path, e)
+    private fun handleBusinessExceptionLogging(level: LogLevel) {
         when (level) {
-            LogLevel.DEBUG -> log().debug(message)
-            LogLevel.INFO -> log().info(message)
-            LogLevel.WARN -> log().warn(message)
-            LogLevel.ERROR -> log().error(message)
-            LogLevel.TRACE -> log().trace(message)
-            LogLevel.OFF -> log().info(message)
-            else -> log().info(message)
+            LogLevel.DEBUG -> log().debug("authentication business request rejected")
+            LogLevel.INFO -> log().info("authentication business request rejected")
+            LogLevel.WARN -> log().warn("authentication business request rejected")
+            LogLevel.ERROR -> log().error("authentication business request rejected")
+            LogLevel.TRACE -> log().trace("authentication business request rejected")
+            LogLevel.OFF -> log().info("authentication business request rejected")
+            else -> log().info("authentication business request rejected")
         }
     }
 
-    private fun handleAuthExceptionLogging(e: AuthException, level: AuthLogLevel, path: String) {
-        val message = logMessage(e.errorCode, path, e)
+    private fun handleAuthExceptionLogging(level: AuthLogLevel) {
         when (level) {
-            AuthLogLevel.DEBUG -> log().debug(message)
-            AuthLogLevel.INFO -> log().info(message)
-            AuthLogLevel.WARN -> log().warn(message)
-            AuthLogLevel.ERROR -> log().error(message)
-            AuthLogLevel.TRACE -> log().trace(message)
-            else -> log().info(message)
+            AuthLogLevel.DEBUG -> log().debug("authentication request rejected")
+            AuthLogLevel.INFO -> log().info("authentication request rejected")
+            AuthLogLevel.WARN -> log().warn("authentication request rejected")
+            AuthLogLevel.ERROR -> log().error("authentication request rejected")
+            AuthLogLevel.TRACE -> log().trace("authentication request rejected")
+            else -> log().info("authentication request rejected")
         }
     }
-
-    private fun logMessage(errorCode: ErrorCode?, path: String, e: Exception): String =
-        """
-            errorCode = ${errorCode?.name}
-            message = ${errorCode?.message}
-            requestPath = $path
-            stackTrace = ${e.printStackTrace()}
-            cause = ${e.cause}
-            message = ${e.message}
-        """.trimIndent()
 }

@@ -9,10 +9,8 @@ import io.grpc.ServerCall
 import io.grpc.ServerCallHandler
 import io.grpc.ServerInterceptor
 import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor
-import org.woo.apm.log.log
 import org.woo.grpc.AuthMetadata.AUTHORIZATION_METADATA_KEY
 import org.woo.grpc.AuthMetadata.JWT_TOKEN_CONTEXT_KEY
-import kotlin.math.log
 import exception.ErrorCode as AuthErrorCode
 
 @GrpcGlobalServerInterceptor
@@ -23,7 +21,6 @@ class JwtTokenInterceptor : ServerInterceptor {
         next: ServerCallHandler<ReqT, RespT>?,
     ): ServerCall.Listener<ReqT> {
         val jwtToken: String? = extractJwtToken(headers)
-        log().info("incoming access token from JWT $jwtToken")
         val context = Context.current().withValue(JWT_TOKEN_CONTEXT_KEY, jwtToken)
         return Contexts.interceptCall(context, call, headers, next)
     }

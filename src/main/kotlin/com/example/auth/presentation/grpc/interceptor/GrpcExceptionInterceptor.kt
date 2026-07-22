@@ -26,9 +26,9 @@ class GrpcExceptionInterceptor: ServerInterceptor {
                 try {
                     super.onMessage(message)
                 } catch (e: AuthException) {
-                    handleException(e, call)
+                    handleException(e)
                 } catch (e: BusinessException) {
-                    handleException(e, call)
+                    handleException(e)
                 }
             }
 
@@ -37,9 +37,9 @@ class GrpcExceptionInterceptor: ServerInterceptor {
                 try {
                     super.onHalfClose()
                 } catch (e: AuthException) {
-                    handleException(e, call)
+                    handleException(e)
                 } catch (e: BusinessException) {
-                    handleException(e, call)
+                    handleException(e)
                 }
             }
 
@@ -47,8 +47,8 @@ class GrpcExceptionInterceptor: ServerInterceptor {
             override fun onCancel() {
                 try {
                     super.onCancel()
-                } catch (e: Exception) {
-                    log().warn("Exception during onCancel", e)
+                } catch (_: Exception) {
+                    log().warn("gRPC cancellation handler failed")
                 }
             }
 
@@ -65,12 +65,12 @@ class GrpcExceptionInterceptor: ServerInterceptor {
         try {
             block()
         } catch (e: AuthException) {
-            handleException(e, this)
+            handleException(e)
         } catch (e: BusinessException) {
-            handleException(e, this)
+            handleException(e)
         }
     }
-    private fun <ReqT, ResT>handleException(e: RuntimeException, call: ServerCall<ReqT, ResT>) {
-        log().warn(e.message)
+    private fun handleException(@Suppress("UNUSED_PARAMETER") e: RuntimeException) {
+        log().warn("gRPC request failed")
     }
 }

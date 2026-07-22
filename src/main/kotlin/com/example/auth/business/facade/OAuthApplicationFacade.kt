@@ -36,11 +36,9 @@ class OAuthApplicationFacade(
         val applicationOauth = applicationOAuthService.findById(registrationId)
             ?: throw BusinessException(ErrorCode.NOT_FOUND_REGISTRATION, null)
         val applicationId = applicationOauth.applicationId
-        val applicationUser = applicationService.getApplicationUser(applicationId, userId)
-        if (applicationUser == null) {
-            val defaultAuthority = applicationService.getLowLevelApplicationAuthority(applicationId)
-            applicationService.createApplicationUser(applicationId, userId, defaultAuthority.id)
-        }
+        val defaultAuthority = applicationService.getLowLevelApplicationAuthority(applicationId)
+        applicationService.ensureApplicationUser(applicationId, userId, defaultAuthority.id)
+        Unit
     }
 
     suspend fun createEndUserIfNotExist(user: OAuth2User, registrationId: String, oauthAccessToken: OAuth2AccessToken): Pair<User, SocialLoginUser> =

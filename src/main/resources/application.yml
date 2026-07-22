@@ -54,7 +54,7 @@ logging:
   level:
     org:
       springframework:
-        security: debug
+        security: info
 #logging:
 #  level:
 #    root: debug

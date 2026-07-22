@@ -119,8 +119,6 @@ class JwtTokenService(
         val key = getRefreshTokenKey(userId, applicationId)
         log().info("jwtTokenService.rotationToken")
         val refreshTokenInRedis = redisDriver.getValue(key, String::class.java)
-        log().info("Redis result: $refreshTokenInRedis")
-        log().info("Redis result is null: ${refreshTokenInRedis == null}")
         return refreshTokenInRedis?.let { token ->
             if (token != refreshToken) throw MalFormedTokenException(AuthErrorCode.EXPIRED_JWT, null)
             buildAndSave(claims)
@@ -140,7 +138,7 @@ class JwtTokenService(
         } catch (e: ExpiredJwtException) {
             throw exception.ExpiredJwtException(AuthErrorCode.EXPIRED_JWT, e)
         } catch (e: JwtException) {
-            log().error("accessToken parse error from $token")
+            log().error("access token parsing failed")
             throw ParseJwtFailedException(AuthErrorCode.PARSE_JWT_FAILED, e)
         }
 

@@ -3,7 +3,6 @@ package com.example.auth.common.config
 import com.example.auth.business.service.JwtTokenService
 import com.example.auth.business.service.oauth.OAuthAuthenticationSuccessHandler
 import com.example.auth.domain.repository.DynamicReactiveClientRegistrationRepository
-import com.example.auth.presentation.rest.filter.LoggingFilter
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet
@@ -24,7 +23,6 @@ import org.springframework.security.config.Customizer.withDefaults
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity.SessionManagementSpec
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -61,7 +59,6 @@ class SecurityConfig(
     private val jwtTokenService: JwtTokenService,
     @Value("\${jwt.access-token.secret-key}")
     private val accessTokenSecretKeyString: String,
-    val loggingFilter: LoggingFilter,
 ) {
     private val accessTokenSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessTokenSecretKeyString))
 
@@ -115,7 +112,6 @@ class SecurityConfig(
             .sessionManagement {
                 SessionCreationPolicy.STATELESS
             }
-            .addFilterBefore(loggingFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .authorizeExchange { exchange ->
                 exchange
                     .pathMatchers(HttpMethod.OPTIONS).permitAll()

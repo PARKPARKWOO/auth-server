@@ -53,8 +53,8 @@ class PassportArgumentResolver : HandlerMethodArgumentResolver {
         if (raw.isNullOrBlank()) return null
         return try {
             Jackson.readValue(raw, Passport::class.java)
-        } catch (e: Exception) {
-            log().warn("failed to parse $PASSPORT_HEADER: ${e.message}")
+        } catch (_: Exception) {
+            log().warn("failed to parse X-User-Passport")
             null
         }
     }

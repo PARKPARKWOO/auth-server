@@ -1,5 +1,7 @@
 package com.example.auth.business.service.application
 
+import com.example.auth.business.exception.BusinessException
+import com.example.auth.common.http.error.ErrorCode
 import com.example.auth.domain.entity.application.Application
 import com.example.auth.domain.entity.application.ApplicationAuthority
 import com.example.auth.domain.entity.applicationuser.ApplicationUser
@@ -14,6 +16,7 @@ import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.domain.Pageable
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 
@@ -57,6 +60,25 @@ class ApplicationService(
             val user = ApplicationUser.create(userId, applicationId, authorityId)
             applicationUserRepository.save(user).awaitSingle()
         }
+
+    suspend fun ensureApplicationUser(
+        applicationId: String,
+        userId: String,
+        authorityId: Long,
+    ): ApplicationUser = coroutineScope {
+        applicationUserRepository.findByApplicationIdAndUserId(applicationId, userId)
+            .awaitSingleOrNull()
+            ?.let { return@coroutineScope it }
+
+        val user = ApplicationUser.create(userId, applicationId, authorityId)
+        try {
+            applicationUserRepository.save(user).awaitSingle()
+        } catch (_: DuplicateKeyException) {
+            applicationUserRepository.findByApplicationIdAndUserId(applicationId, userId)
+                .awaitSingleOrNull()
+                ?: throw BusinessException(ErrorCode.UNKNOWN_ERROR, null)
+        }
+    }
 
     fun getApplicationUserByPage(pageable: Pageable, applicationId: String): Flux<ApplicationUser> =
         applicationUserRepository.findAllByApplicationId(pageable, applicationId)
