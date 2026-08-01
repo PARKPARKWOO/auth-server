@@ -40,9 +40,6 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
-import org.springframework.web.cors.CorsConfiguration
-import org.springframework.web.cors.reactive.CorsWebFilter
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import reactor.kotlin.core.publisher.toMono
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -142,25 +139,6 @@ class SecurityConfig(
     @Bean
     fun oAuth2AuthenticationSuccessHandler(): ServerAuthenticationSuccessHandler =
         OAuthAuthenticationSuccessHandler(jwtTokenService)
-
-    @Bean
-    fun corsWebFilter(): CorsWebFilter {
-        val config =
-            CorsConfiguration().apply {
-                allowedOriginPatterns = listOf("*")
-                allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                allowedHeaders = listOf("Authorization", "Content-Type")
-                allowCredentials = true
-                exposedHeaders = listOf("Set-Cookie", "Authorization")
-            }
-
-        val source =
-            UrlBasedCorsConfigurationSource().apply {
-                registerCorsConfiguration("/**", config)
-            }
-
-        return CorsWebFilter(source)
-    }
 
     //    @Bean
 //    fun jwtDecoder(): ReactiveJwtDecoder {
