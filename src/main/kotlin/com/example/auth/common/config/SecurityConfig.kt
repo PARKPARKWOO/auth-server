@@ -198,10 +198,7 @@ class SecurityConfig(
     private fun jwtConverter(): ReactiveJwtAuthenticationConverterAdapter {
         val adapter =
             ReactiveJwtAuthenticationConverterAdapter { jwt ->
-                val authorities: List<String> =
-                    jwt.claims[AuthConstant.USER_ROLE]?.let {
-                        it as List<String>
-                    } ?: emptyList()
+                val authorities = extractAuthorities(jwt.claims[AuthConstant.USER_ROLE])
 
                 UsernamePasswordAuthenticationToken(
                     jwt.subject,
@@ -211,6 +208,18 @@ class SecurityConfig(
             }
         return adapter
     }
+
+    private fun extractAuthorities(userRoleClaim: Any?): List<String> =
+        when (userRoleClaim) {
+            is String -> listOf(userRoleClaim)
+            is Collection<*> ->
+                if (userRoleClaim.all { it is String }) {
+                    userRoleClaim.map { it as String }
+                } else {
+                    emptyList()
+                }
+            else -> emptyList()
+        }
 
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
