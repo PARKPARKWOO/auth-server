@@ -1,5 +1,6 @@
 package com.example.auth.business.service.oauth
 
+import com.example.auth.business.service.CookieService
 import com.example.auth.business.service.JwtTokenService
 import com.example.auth.domain.model.application.RedirectType
 import com.example.auth.domain.model.oauth.AbstractSocialUser
@@ -11,20 +12,29 @@ import kotlinx.coroutines.reactor.mono
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseCookie
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.server.WebFilterExchange
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import java.net.URI
-import java.time.Duration
 
 @Component
 class OAuthAuthenticationSuccessHandler(
     private val jwtTokenService: JwtTokenService,
 ) : ServerAuthenticationSuccessHandler {
+    @field:Autowired
+    private lateinit var cookieService: CookieService
+
+    internal constructor(
+        jwtTokenService: JwtTokenService,
+        cookieService: CookieService,
+    ) : this(jwtTokenService) {
+        this.cookieService = cookieService
+    }
+
     override fun onAuthenticationSuccess(
         webFilterExchange: WebFilterExchange,
         authentication: Authentication?,
@@ -82,8 +92,7 @@ class OAuthAuthenticationSuccessHandler(
 
     private suspend fun ServerHttpResponse.sendJwtResponseAsCookie(jwtResponse: JwtResponseDto, redirectUrl: String, origin: String?) {
         this.apply {
-            addCookie(createCookie("accessToken", jwtResponse.accessToken, jwtResponse.accessTokenExpiresIn))
-            addCookie(createCookie("refreshToken", jwtResponse.refreshToken, jwtResponse.refreshTokenExpiresIn))
+            cookieService.addJwtCookies(this, jwtResponse)
             headers.add("Access-Control-Allow-Credentials", "true")
             origin?.let {
                 headers.add("Access-Control-Allow-Origin", it)
@@ -93,22 +102,6 @@ class OAuthAuthenticationSuccessHandler(
         this.headers.location = uri
         this.statusCode = HttpStatus.FOUND
     }
-
-    private fun createCookie(
-        name: String,
-        value: String,
-        maxAge: Long,
-    ): ResponseCookie =
-        ResponseCookie
-            .from(name, value)
-            // P0-#2: httpOnly. SSO 콜백 시 박는 토큰 쿠키도 동일 정책.
-            .httpOnly(true)
-            .secure(true)
-            .path("/")
-            .domain(".platformholder.site")
-            .maxAge(Duration.ofMillis(maxAge))
-            .sameSite("None")
-            .build()
 
     private suspend fun ServerHttpResponse.setRedirectConfiguration(redirectUrl: String) {
         this.headers.location = URI.create(redirectUrl)

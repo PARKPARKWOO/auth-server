@@ -21,3 +21,9 @@ jwt:
     expire-millis: ${REFRESH_EXPIRE_MILLIS:1000000000000000}
 server:
   port: 8082
+
+auth:
+  cookie:
+    domain: ""
+    secure: false
+    same-site: Lax

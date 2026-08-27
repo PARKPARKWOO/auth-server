@@ -180,7 +180,7 @@ class JwtTokenService(
 
     suspend fun revoke(response: ServerHttpResponse, passport: Passport) {
         val key = getRefreshTokenKey(passport.userId.toString(), passport.signInApplicationId)
-        cookieService.clearCookie(response)
+        cookieService.clearJwtCookies(response)
         redisDriver.delete(key).awaitSingle()
     }
     suspend fun revoke(accessToken: String) {
