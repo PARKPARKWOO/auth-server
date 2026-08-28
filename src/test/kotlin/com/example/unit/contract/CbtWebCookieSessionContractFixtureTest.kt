@@ -27,6 +27,20 @@ class CbtWebCookieSessionContractFixtureTest {
             fixture.replaceFirst("\"cookies\":", "\"missingCookies\":"),
             fixture.replaceFirst("\"httpOnly\":true", "\"httpOnly\":\"true\""),
             fixture.replaceFirst("\"sameSite\":\"None\"", "\"sameSite\":\"INVALID\""),
+            fixture.replaceFirst("\"webDirectReissue\":false", "\"webDirectReissue\":null"),
+            fixture.replaceFirst("\"httpOnly\":false", "\"httpOnly\":null"),
+            fixture.replaceFirst(
+                "\"publicCatalogRead\":{\"methods\":",
+                "\"publicCatalogRead\":{\"method\":null,\"methods\":",
+            ),
+            fixture.replaceFirst(
+                "\"publicCatalogRead\":{\"methods\":",
+                "\"publicCatalogRead\":{\"auth\":null,\"methods\":",
+            ),
+            fixture.replaceFirst(
+                "\"publicQuestionPreviewRead\":{\"method\":",
+                "\"publicQuestionPreviewRead\":{\"anonymousMobileRequired\":null,\"method\":",
+            ),
             fixture.replaceFirst(
                 "\"authTransport\":{\"web\":\"HTTP_ONLY_COOKIE\",\"mobile\":\"BEARER\",\"rotationOwner\":\"GATEWAY\",\"webDirectReissue\":false}",
                 "\"authTransport\":null",
